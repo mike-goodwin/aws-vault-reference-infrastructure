@@ -1,0 +1,157 @@
+TemplateFormatVersion" : "2010-09-09",
+"Description" : "Palindrome - Example of Basic 2-Tier Cloudformation Infrastructure (Stack) Creation",
+
+	"Metadata" : 
+	{
+	},
+
+	"Parameters" : 
+  	{		
+	},
+
+	"Mappings" : 
+	{
+	},
+
+	"Conditions" : 
+	{
+	},
+
+	"Resources" : 
+	{
+   
+  		"PalindromeVPC" : 
+  		{
+      			"Type" : "AWS::EC2::VPC",
+      			"Properties" : 
+      			{
+        			"CidrBlock" : "10.0.0.0/16",
+        			"Tags" : 
+					[ 
+						{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Palindrome Example VPC"} 
+					]
+      			}
+   		},
+
+    		"PublicSubnet" : 
+		{
+      			"Type" : "AWS::EC2::Subnet",
+      			"Properties" : 
+			{
+        			"VpcId" : { "Ref" : "PalindromeVPC" },
+        			"CidrBlock" : "10.0.0.0/24",
+        			"Tags" : 
+					[ 
+						{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} }, 
+						{"Key" : "Name", "Value" : "Public Subnet"} 
+					]
+      			}
+    		},
+
+    		"PrivateSubnet" : 
+		{
+      			"Type" : "AWS::EC2::Subnet",
+      			"Properties" : 
+			{
+        			"VpcId" : { "Ref" : "PalindromeVPC" },
+        			"CidrBlock" : "10.0.1.0/24",
+        			"Tags" : 
+					[ 
+						{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Private Subnet"}
+					]
+      			}
+    		},
+
+	    	"InternetGateway" : 
+		{
+	      			"Type" : "AWS::EC2::InternetGateway",
+	      			"Properties" : 
+				{
+	        			"Tags" : 
+						[ 
+							{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+							{"Key" : "Name", "Value" : "Internet Gateway"}
+						]
+	      			}
+	    	},
+
+	    	"AttachGateway" : 
+		{
+				"Type" : "AWS::EC2::VPCGatewayAttachment",
+				"Properties" : 
+				{
+					"VpcId" : { "Ref" : "PalindromeVPC" },
+	         			"InternetGatewayId" : { "Ref" : "InternetGateway" }
+	       			}
+	    	},
+
+	    	"PublicRouteTable" : 
+		{
+				"Type" : "AWS::EC2::RouteTable",
+				"Properties" : 
+				{
+	        			"VpcId" : {"Ref" : "PalindromeVPC"},
+	        			"Tags" : 
+						[ 
+							{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+							{"Key" : "Name", "Value" : "Public Routing Table"}
+						]
+				}
+	    	},
+
+	    	"PrivateRouteTable" : 
+		{
+				"Type" : "AWS::EC2::RouteTable",
+				"Properties" : 
+				{
+	        			"VpcId" : {"Ref" : "PalindromeVPC"},
+	        			"Tags" : 
+						[ 
+							{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+							{"Key" : "Name", "Value" : "Private Routing Table"}
+						]
+				}
+	    	},
+
+	    	"PublicSubnetRouteTableAssociation" : 
+		{
+				"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+	      			"Properties" : 
+				{
+	        			"SubnetId" : { "Ref" : "PublicSubnet" },
+	        			"RouteTableId" : { "Ref" : "PublicRouteTable" }
+	      			}
+	    	},
+
+	    	"PrivateSubnetRouteTableAssociation" : 
+		{
+				"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+	      			"Properties" : 
+				{
+	        			"SubnetId" : { "Ref" : "PrivateSubnet" },
+	        			"RouteTableId" : { "Ref" : "PrivateRouteTable" }
+	      			}
+	    	},
+
+	    	"PublicRoutes" : 
+		{
+	      			"Type" : "AWS::EC2::Route",
+	      			"DependsOn" : "AttachGateway",
+	      			"Properties" : 
+				{
+	        			"RouteTableId" : { "Ref" : "PublicRouteTable" },
+	        			"DestinationCidrBlock" : "0.0.0.0/0",
+	        			"GatewayId" : { "Ref" : "InternetGateway" }
+	      			}
+	    	}
+
+	
+
+	},
+
+	"Outputs" : 
+	{
+	}
+}

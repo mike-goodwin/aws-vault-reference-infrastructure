@@ -1,0 +1,30 @@
+[
+    {
+		  "ParameterKey": "VPCCIDR",
+		  "ParameterValue": "10.0.0.0/16"
+	  },
+	  {
+		  "ParameterKey": "CIDRForPublicSubnetA",
+		  "ParameterValue": "10.0.0.0/27"
+	  },
+	  {
+		  "ParameterKey": "CIDRForPublicSubnetB",
+		  "ParameterValue": "10.0.0.32/27"
+	  },
+  	{
+    	"ParameterKey": "CIDRForPublicSubnetC",
+		  "ParameterValue": "10.0.0.64/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForPrivateSubnetA",
+		  "ParameterValue": "10.0.0.96/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForPrivateSubnetB",
+		  "ParameterValue": "10.0.0.128/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForPrivateSubnetC",
+		  "ParameterValue": "10.0.0.160/27"
+  	}
+]

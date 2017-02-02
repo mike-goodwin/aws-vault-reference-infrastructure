@@ -25,25 +25,25 @@ Some key features:
 
 To do:
 
-Network
-Components
-Deployment/CloudFormation
+* Network
+* Components
+* Deployment/CloudFormation
 
 ## Vault config ##
 
 To do: 
 
-Initialisation
-Storage backend
-Audit backend
-MySQL secret backend
+* Initialisation
+* Storage backend
+* Audit backend
+* MySQL secret backend
 
 ## IAM policies ##
 
 To do:
 
-Normal privilege
-High privilege
+* Normal privilege
+* High privilege
 
 ## The client application ##
 

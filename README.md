@@ -10,7 +10,47 @@ Vault is a good fit for a few use cases. The main one we are looking at is for a
 * It automates credential rotation, making it easy to comply with your crypto key management best practises
 * It removes the need to store credentials in potentially insecure config files or similar
 
+Here is the overall architecture:
+
 ![Architecure Overview](/images/Vault Reference Architecture.png)
+
+Some key features:
+
+* If the Vault fails, any dependent application fails too, so it is multi AZ and multi-server in each AZ
+* The storage backend must also support HA (we have chosen [DynamoDB](https://www.vaultproject.io/docs/config/#dynamodb))
+* The [MySQL secret backend](https://www.vaultproject.io/docs/secrets/mssql/index.html) generates credentials on the fly so it needs access to the DB. We are using VPG Gateways to lock down access to the DB
+* We are using the [AWS EC2 Auth backend](https://www.vaultproject.io/docs/auth/aws-ec2.html) so that we can make use of [IAM roles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to control access to the Vault
+
+## Infrastructure ##
+
+To do:
+
+Network
+Components
+Deployment/CloudFormation
+
+## Vault config ##
+
+To do: 
+
+Initialisation
+Storage backend
+Audit backend
+MySQL secret backend
+
+## IAM policies ##
+
+To do:
+
+Normal privilege
+High privilege
+
+## The client application ##
+
+To do:
+
+* Making the app "vault aware"
+* Dynamic privilege elevation
 
 ## About the authors ##
 We are not affiliated to Hashicorp or the Vault project in any way and any recommendations made are our own and not endorsed by Hashicorp. We just like Vault, AWS, security and messing about with cool tech :-)

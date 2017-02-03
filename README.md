@@ -1,6 +1,6 @@
 # A reference architecture for [Hashicorp Vault](https://github.com/hashicorp/vault) on AWS
 This project aims to show how to build an secure and resilient impementation of Vault on the AWS platform, consumed by a simple web application that includes some good security coding practises.
-Hopefully this will help you get the best out of your Vault out of your projects. The project is licensed under the Apache v2.0 license, so you are free to use or modify it however you like.
+Hopefully this will help you get the best out of your Vault out of your projects. The project is licensed under the Apache v2.0 license, so you are free to use or modify it however you like, but we don't offer any kind of warranty!
 
 ## Overview ##
 

@@ -1,0 +1,318 @@
+{
+"AWSTemplateFormatVersion" : "2010-09-09",
+"Description" : "Hashicorp Vault Reference: Core Network Infrastructure: This template creates the Private VPC for the Vault instances, between 1-4 Subnets (so it can be deployed in any region and these are enabled/disabled in the parameters), Routing Table, Routes, a NAT Gateway and Internet Gateway",
+
+	"Metadata" :
+	{
+	},
+
+	"Parameters" :
+  {
+      "VPCCIDR" :
+      {
+        "Description" : "CIDR for Vault Reference VPC",
+        "Type" : "String",
+        "Default" : "10.0.0.0/16"
+      },
+      "AvailabilityZones":
+      {
+        "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved.",
+        "Type": "List<AWS::EC2::AvailabilityZone::Name>"
+      },
+      "CIDRForPublicNATSubnet" :
+      {
+        "Description" : "CIDR for Vault Reference Public Subnet for NAT Only",
+        "Type" : "String",
+        "Default" : "10.0.0.64/27"
+      },
+      "CIDRForVaultPrivateSubnet1" :
+      {
+        "Description" : "CIDR for Vault Reference Private Subnet 1",
+        "Type" : "String",
+        "Default" : "10.0.0.96/27"
+      },
+      "DeployVaultPrivateSubnet1" :
+      {
+        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 1.",
+        "Type" : "String",
+        "Default" : "yes"
+      },
+      "CIDRForVaultPrivateSubnet2" :
+      {
+        "Description" : "CIDR for Vault Reference Private Subnet 2",
+        "Type" : "String",
+        "Default" : "10.0.0.128/27"
+      },
+      "DeployVaultPrivateSubnet2" :
+      {
+        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 2.",
+        "Type" : "String",
+        "Default" : "yes"
+      },
+      "CIDRForVaultPrivateSubnet3" :
+      {
+        "Description" : "CIDR for Vault Reference Private Subnet 3",
+        "Type" : "String",
+        "Default" : "10.0.0.160/27"
+      },
+      "DeployVaultPrivateSubnet3" :
+      {
+        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 3.",
+        "Type" : "String",
+        "Default" : "yes"
+      },
+      "CIDRForVaultPrivateSubnet4" :
+      {
+        "Description" : "CIDR for Vault Reference Private Subnet 4",
+        "Type" : "String",
+        "Default" : "10.0.0.192/27"
+      },
+      "DeployVaultPrivateSubnet4" :
+      {
+        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 4.",
+        "Type" : "String",
+        "Default" : "yes"
+      }
+      
+	},
+
+	"Mappings" :
+	{
+	},
+
+	"Conditions" :
+	{
+	    "PrivateSubnet1Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet1" }, "yes" ] },
+	    "PrivateSubnet2Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet2" }, "yes" ] },
+	    "PrivateSubnet3Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet3" }, "yes" ] },
+	    "PrivateSubnet4Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet4" }, "yes" ] }
+	},
+
+	"Resources" :
+	{
+   
+  		"VaultRefVPC" :
+  		{
+      		"Type" : "AWS::EC2::VPC",
+      		"Properties" :
+      		{
+        		  "CidrBlock" : { "Ref" : "VPCCIDR"} ,
+        		  "Tags" :
+					    [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"}},
+						  {"Key" : "Name", "Value" : "Vault Reference VPC"}]
+      		}
+   		},
+
+	    "VaultRefPublicNATSubnet" :
+	  	{
+      		"Type" : "AWS::EC2::Subnet",
+      		"Properties" :
+			    {
+        			"VpcId" : { "Ref" : "VaultRefVPC" },
+        			"CidrBlock" : { "Ref" : "CIDRForPublicNATSubnet" },
+        			"AvailabilityZone" : { "Fn::Select": ["0",{ "Ref": "AvailabilityZones" }] },
+        			"Tags" :
+					    [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+					    {"Key" : "Name", "Value" : "Vault Reference Public NAT Subnet"}]
+      		}
+    	},
+
+    	"VaultRefPrivateSubnet1" :
+		  {
+      		"Type" : "AWS::EC2::Subnet",
+      		"Condition" : "PrivateSubnet1Toggle",
+      		"Properties" :
+			    {
+        		"VpcId" : { "Ref" : "VaultRefVPC" },
+        		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet1" },
+        		"AvailabilityZone" : { "Fn::Select": ["0",{ "Ref": "AvailabilityZones" }] },
+        		"Tags" :
+					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 1"}]
+      		}
+    	},
+
+    	"VaultRefPrivateSubnet2" :
+		  {
+      		"Type" : "AWS::EC2::Subnet",
+      		"Condition" : "PrivateSubnet2Toggle",
+      		"Properties" :
+			    {
+        		"VpcId" : { "Ref" : "VaultRefVPC" },
+        		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet2" },
+        		"AvailabilityZone" : { "Fn::Select": ["1",{ "Ref": "AvailabilityZones" }] },
+        		"Tags" :
+					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 2"}]
+      		}
+    	},
+   
+    	"VaultRefPrivateSubnet3" :
+		  {
+      		"Type" : "AWS::EC2::Subnet",
+      		"Condition" : "PrivateSubnet3Toggle",
+      		"Properties" :
+			    {
+        		"VpcId" : { "Ref" : "VaultRefVPC" },
+        		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet3" },
+        		"AvailabilityZone" : { "Fn::Select": ["2",{ "Ref": "AvailabilityZones" }] },
+        		"Tags" :
+					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 3"}]
+      		}
+    	},
+    	
+      "VaultRefPrivateSubnet4" :
+		  {
+      		"Type" : "AWS::EC2::Subnet",
+      		"Condition" : "PrivateSubnet4Toggle",
+      		"Properties" :
+			    {
+        		"VpcId" : { "Ref" : "VaultRefVPC" },
+        		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet4" },
+        		"AvailabilityZone" : { "Fn::Select": ["3",{ "Ref": "AvailabilityZones" }] },
+        		"Tags" :
+					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 4"}]
+      		}
+    	},
+    	
+	    "VaultRefIGW" :
+		  {
+	      	"Type" : "AWS::EC2::InternetGateway",
+	      	"Properties" :
+				  {
+	        	"Tags" :
+						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Internet Gateway"}]
+	      	}
+	    },
+
+	    "VaultRefAttachGateway" :
+		  {
+				  "Type" : "AWS::EC2::VPCGatewayAttachment",
+				  "Properties" :
+				  {
+					  "VpcId" : { "Ref" : "VaultRefVPC" },
+	         	"InternetGatewayId" : { "Ref" : "VaultRefIGW" }
+	       	}
+	    },
+
+	    "VaultRefPrivateRouteTable" :
+      {
+			    "Type" : "AWS::EC2::RouteTable",
+				  "Properties" :
+				  {
+	          "VpcId" : {"Ref" : "VaultRefVPC"},
+	        	"Tags" :
+						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Private Routing Table"}]
+          }
+	    },
+	    
+	    "VaultRefPublicRouteTable" :
+		  {
+				  "Type" : "AWS::EC2::RouteTable",
+				  "Properties" :
+				  {
+	        	"VpcId" : {"Ref" : "VaultRefVPC"},
+	        	"Tags" :
+						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "Vault Reference Public Routing Table"}]
+				  }
+	    },
+
+	    "VaultRefPublicRoute" :
+		  {
+	      	"Type" : "AWS::EC2::Route",
+	      	"DependsOn" : "VaultRefAttachGateway",
+	      	"Properties" :
+				  {
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" },
+	        		"DestinationCidrBlock" : "0.0.0.0/0",
+	        		"GatewayId" : { "Ref" : "VaultRefIGW" }
+	      	}
+	    },
+	    
+		  "VaultRefPrivateSubnetRouteTableAssociation1" :
+		  {
+			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      		"Condition" : "PrivateSubnet1Toggle",
+	      	"Properties" :
+				  {
+	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet1" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
+	      	}
+	    },
+	    
+			"VaultRefPrivateSubnetRouteTableAssociation2" :
+		  {
+			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      		"Condition" : "PrivateSubnet2Toggle",
+	      	"Properties" :
+				  {
+	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet2" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
+	      	}
+	    },
+
+			"VaultRefPrivateSubnetRouteTableAssociation3" :
+		  {
+			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      		"Condition" : "PrivateSubnet3Toggle",
+	      	"Properties" :
+				  {
+	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet3" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
+	      	}
+	    },
+	    
+			"VaultRefPrivateSubnetRouteTableAssociation4" :
+		  {
+			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+      		"Condition" : "PrivateSubnet4Toggle",
+	      	"Properties" :
+				  {
+	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet4" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
+	      	}
+	    },
+	    
+      "VaultRefNAT" :
+      {
+          "DependsOn" : "VaultRefAttachGateway",
+          "Type" : "AWS::EC2::NatGateway",
+          "Properties" :
+          {
+              "AllocationId" : { "Fn::GetAtt" : ["VaultRefEIP", "AllocationId"]},
+              "SubnetId" : { "Ref" : "VaultRefPublicNATSubnet"}
+          }
+      },
+      
+      "VaultRefEIP" :
+      {
+          "Type" : "AWS::EC2::EIP",
+          "Properties" :
+          {
+              "Domain" : "vpc"
+          }
+      },
+      
+      "VaultRefPrivateRoute" :
+      {
+          "Type" : "AWS::EC2::Route",
+          "Properties" :
+          {
+              "RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" },
+              "DestinationCidrBlock" : "0.0.0.0/0",
+              "NatGatewayId" : { "Ref" : "VaultRefNAT" }
+          }
+      }
+	
+
+	},
+
+	"Outputs" :
+	{
+	}
+}

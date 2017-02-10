@@ -3,28 +3,40 @@
 		  "ParameterKey": "VPCCIDR",
 		  "ParameterValue": "10.0.0.0/16"
 	  },
-	  {
-		  "ParameterKey": "CIDRForPublicSubnetA",
-		  "ParameterValue": "10.0.0.0/27"
-	  },
-	  {
-		  "ParameterKey": "CIDRForPublicSubnetB",
-		  "ParameterValue": "10.0.0.32/27"
-	  },
   	{
-    	"ParameterKey": "CIDRForPublicSubnetC",
-		  "ParameterValue": "10.0.0.64/27"
+    	"ParameterKey": "AvailabilityZones",
+		  "ParameterValue": "eu-west-1a,eu-west-1b,eu-west-1c"
   	},
   	{
-    	"ParameterKey": "CIDRForPrivateSubnetA",
+    	"ParameterKey": "CIDRForVaultPrivateSubnet1",
 		  "ParameterValue": "10.0.0.96/27"
   	},
   	{
-    	"ParameterKey": "CIDRForPrivateSubnetB",
+    	"ParameterKey": "DeployVaultPrivateSubnet1",
+		  "ParameterValue": "yes"
+  	},
+  	{
+    	"ParameterKey": "CIDRForVaultPrivateSubnet2",
 		  "ParameterValue": "10.0.0.128/27"
   	},
   	{
-    	"ParameterKey": "CIDRForPrivateSubnetC",
+    	"ParameterKey": "DeployVaultPrivateSubnet2",
+		  "ParameterValue": "yes"
+  	},
+  	{
+    	"ParameterKey": "CIDRForVaultPrivateSubnet3",
 		  "ParameterValue": "10.0.0.160/27"
+  	},
+  	{
+    	"ParameterKey": "DeployVaultPrivateSubnet3",
+		  "ParameterValue": "no"
+  	},
+  	{
+    	"ParameterKey": "CIDRForVaultPrivateSubnet4",
+		  "ParameterValue": "10.0.0.192/27"
+  	},
+  	{
+    	"ParameterKey": "DeployVaultPrivateSubnet4",
+		  "ParameterValue": "no"
   	}
 ]

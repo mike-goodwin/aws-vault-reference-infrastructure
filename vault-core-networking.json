@@ -315,6 +315,15 @@
 	"Outputs" :
 	{
 	  
+	   "VaultRefVPC":
+		{
+	     "Value":
+		  {
+	       "Ref": "VaultRefVPC"
+		  },
+	      "Description": "VPC ID"
+	   },
+	  
 	  "VaultPrivateSubnet1" :
 	  {
       "Description": "ID of Private Subnet 1",

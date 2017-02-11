@@ -218,7 +218,7 @@
 	        	"VpcId" : {"Ref" : "VaultRefVPC"},
 	        	"Tags" :
 						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Public Routing Table"}]
+						{"Key" : "Name", "Value" : "Vault Reference Public Routing Table, used only for NAT Gateway"}]
 				  }
 	    },
 
@@ -314,5 +314,44 @@
 
 	"Outputs" :
 	{
+	  
+	  "VaultPrivateSubnet1" :
+	  {
+      "Description": "ID of Private Subnet 1",
+      "Value" : { "Ref" : "VaultRefPrivateSubnet1" }
+    },
+    
+    "VaultPrivateSubnet1Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 1? yes/no",
+      "Value" : { "Ref" : "DeployVaultPrivateSubnet1" }
+    },
+    
+    "VaultPrivateSubnet2" :
+	  {
+      "Description": "ID of Private Subnet 2",
+      "Value" : { "Ref" : "VaultRefPrivateSubnet2" }
+    },
+    
+    "VaultPrivateSubnet2Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 2? yes/no",
+      "Value" : { "Ref" : "DeployVaultPrivateSubnet2" }
+    },
+    
+    "VaultPrivateSubnet3" :
+	  {
+      "Description": "ID of Private Subnet 3",
+      "Value" : { "Ref" : "VaultRefPrivateSubnet3" }
+    },
+    
+    "VaultPrivateSubnet3Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 3? yes/no",
+      "Value" : { "Ref" : "DeployVaultPrivateSubnet3" }
+    }
+    
+	  
+	  
 	}
 }

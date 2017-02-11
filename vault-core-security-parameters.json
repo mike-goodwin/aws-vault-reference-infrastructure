@@ -1,0 +1,10 @@
+[
+    {
+		  "ParameterKey": "VaultStackName",
+		  "ParameterValue": "Hashicorp-Vault-Reference-Master"
+	  },
+  	{
+    	"ParameterKey": "VaultIngressCIDR",
+		  "ParameterValue": "77.99.240.119/32"
+  	}
+]

@@ -151,7 +151,7 @@
 		        }
 		  },
     
-      "VaultInstanceSecurityGroup" :
+      "VaultPublicInstanceSecurityGroup" :
       {
           "Type" : "AWS::EC2::SecurityGroup",
           "Properties" :
@@ -172,7 +172,103 @@
                 "CidrIp" : "0.0.0.0/0"
             }]
           }
+      },
+     "VaultPrivateInstanceSecurityGroup" :
+      {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties" :
+          {
+            "GroupDescription" : "Allow http to client host",
+            "VpcId" : { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] },
+            "SecurityGroupIngress" : [{
+                "IpProtocol" : "tcp",
+                "FromPort" : "22",
+                "ToPort" : "22",
+                "CidrIp" :  "0.0.0.0/0"
+            }],
+            
+            "SecurityGroupEgress" : [{
+                "IpProtocol" : "tcp",
+                "FromPort" : "22",
+                "ToPort" : "22",
+                "CidrIp" : "0.0.0.0/0"
+            }]
+          }
+      },
+      
+    "VaultEC2InstanceRole" :
+    {
+      "Type" : "AWS::IAM::Role",
+      "Properties" :
+      {
+        "AssumeRolePolicyDocument" :
+        {
+          "Statement" :
+          [{
+            "Action" : ["sts:AssumeRole"],
+            "Effect" : "Allow",
+            "Principal" :
+            {
+             "Service" : [ "ec2.amazonaws.com"]
+            }
+          }]
+        }
       }
+    },
+
+    "VaultEC2InstanceProfile" :
+    {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" :
+      {
+        "Path" : "/",
+        "Roles" : [{ "Ref" : "VaultEC2InstanceRole" }]
+      }
+    },
+
+    "VaultEC2InstancePolicy" :
+    {
+      "Type" : "AWS::IAM::Policy",
+      "Properties" :
+      {
+        "PolicyDocument" :
+        {
+          "Statement" :
+          [
+          {
+           "Effect" : "Allow",
+           "Action" : [
+             "ec2:*"
+           ],
+           "Resource" : "*"
+          }
+          ]
+        },
+        "PolicyName" : "Vault-Reference-Instance-Policy",
+        "Roles" : [ { "Ref" : "VaultEC2InstanceRole"}]
+        }
+      
+    },
+    
+    "VaultEC2Instance1" :
+      {
+        "Type" : "AWS::EC2::Instance",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : "ami-70edb016",
+          "InstanceType" : "t2.micro",
+          "KeyName" : "palindrome_2017",
+          "SecurityGroupIds" : [{ "Ref" : "VaultPrivateInstanceSecurityGroup" }],
+          "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet1"] },
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "private_instance" } ]
+	   
+        }
+      }
+      
+      
+      
   },
 
 	"Outputs" :

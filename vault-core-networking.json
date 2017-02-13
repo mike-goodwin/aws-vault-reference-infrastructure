@@ -19,9 +19,21 @@
         "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved.",
         "Type": "List<AWS::EC2::AvailabilityZone::Name>"
       },
-      "CIDRForPublicNATSubnet" :
+      "CIDRForPublicSubnet1" :
       {
-        "Description" : "CIDR for Vault Reference Public Subnet for NAT Only",
+        "Description" : "CIDR for Vault Reference Public Subnet 1",
+        "Type" : "String",
+        "Default" : "10.0.0.0/27"
+      },
+      "CIDRForPublicSubnet2" :
+      {
+        "Description" : "CIDR for Vault Reference Public Subnet 2",
+        "Type" : "String",
+        "Default" : "10.0.0.32/27"
+      },
+      "CIDRForPublicSubnet3" :
+      {
+        "Description" : "CIDR for Vault Reference PublicSubnet 3",
         "Type" : "String",
         "Default" : "10.0.0.64/27"
       },
@@ -102,20 +114,48 @@
 						  {"Key" : "Name", "Value" : "Vault Reference VPC"}]
       		}
    		},
-
-	    "VaultRefPublicNATSubnet" :
+   		
+  	    "VaultRefPublicSubnet1" :
 	  	{
       		"Type" : "AWS::EC2::Subnet",
       		"Properties" :
 			    {
         			"VpcId" : { "Ref" : "VaultRefVPC" },
-        			"CidrBlock" : { "Ref" : "CIDRForPublicNATSubnet" },
+        			"CidrBlock" : { "Ref" : "CIDRForPublicSubnet1" },
         			"AvailabilityZone" : { "Fn::Select": ["0",{ "Ref": "AvailabilityZones" }] },
         			"Tags" :
 					    [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-					    {"Key" : "Name", "Value" : "Vault Reference Public NAT Subnet"}]
+					    {"Key" : "Name", "Value" : "Vault Reference Public Subnet 1"}]
       		}
     	},
+
+      "VaultRefPublicSubnet2" :
+      {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" :
+          {
+                "VpcId" : { "Ref" : "VaultRefVPC" },
+                "CidrBlock" : { "Ref" : "CIDRForPublicSubnet2" },
+                "AvailabilityZone" : { "Fn::Select": ["1",{ "Ref": "AvailabilityZones" }] },
+                "Tags" :
+                [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+                {"Key" : "Name", "Value" : "Vault Reference Public Subnet 2"}]
+          }
+      },
+
+      "VaultRefPublicSubnet3" :
+      {
+          "Type" : "AWS::EC2::Subnet",
+          "Properties" :
+          {
+                  "VpcId" : { "Ref" : "VaultRefVPC" },
+                  "CidrBlock" : { "Ref" : "CIDRForPublicSubnet3" },
+                  "AvailabilityZone" : { "Fn::Select": ["2",{ "Ref": "AvailabilityZones" }] },
+                  "Tags" :
+                  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+                  {"Key" : "Name", "Value" : "Vault Reference Public Subnet 3"}]
+          }
+      },
 
     	"VaultRefPrivateSubnet1" :
 		  {
@@ -234,6 +274,36 @@
 	      	}
 	    },
 	    
+	    "VaultRefPublicSubnetRouteTableAssociation1" :
+		  {
+				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+	      	"Properties" :
+				  {
+	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet1" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" }
+	      	}
+	    },
+	    
+	    "VaultRefPublicSubnetRouteTableAssociation2" :
+		  {
+				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+	      	"Properties" :
+				  {
+	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet2" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" }
+	      	}
+	    },
+	    
+	    "VaultRefPublicSubnetRouteTableAssociation3" :
+		  {
+				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+	      	"Properties" :
+				  {
+	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet3" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" }
+	      	}
+	    },
+	    
 		  "VaultRefPrivateSubnetRouteTableAssociation1" :
 		  {
 			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
@@ -285,7 +355,7 @@
           "Properties" :
           {
               "AllocationId" : { "Fn::GetAtt" : ["VaultRefEIP", "AllocationId"]},
-              "SubnetId" : { "Ref" : "VaultRefPublicNATSubnet"}
+              "SubnetId" : { "Ref" : "VaultRefPublicSubnet1"}
           }
       },
       
@@ -324,6 +394,24 @@
 	      "Description": "VPC ID"
 	   },
 	  
+	  "VaultPublicSubnet1" :
+	  {
+      "Description": "ID of Public Subnet 1",
+      "Value" : { "Ref" : "VaultRefPublicSubnet1" }
+    },
+	  
+		"VaultPublicSubnet2" :
+	  {
+      "Description": "ID of Public Subnet 2",
+      "Value" : { "Ref" : "VaultRefPublicSubnet2" }
+    },
+    
+    "VaultPublicSubnet3" :
+	  {
+      "Description": "ID of Public Subnet 3",
+      "Value" : { "Ref" : "VaultRefPublicSubnet3" }
+    },
+	
 	  "VaultPrivateSubnet1" :
 	  {
       "Description": "ID of Private Subnet 1",

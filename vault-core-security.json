@@ -1,6 +1,6 @@
 {
 "AWSTemplateFormatVersion" : "2010-09-09",
-"Description" : "Hashicorp Vault Reference: Core Security Infrastructure: This template creates a Security Group and 3 ",
+"Description" : "Hashicorp Vault Reference: Core Security Infrastructure: This template creates a Private and Public Security Group and 1 Test EC2 instance.",
 
 	"Metadata" :
 	{
@@ -273,5 +273,78 @@
 
 	"Outputs" :
 	{
+	  
+	  "VaultRefVPC":
+		{
+	     "Value": { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] },
+	     "Description": "VPC ID"
+	   },
+	  
+	  "VaultPublicSubnet1" :
+	  {
+      "Description": "ID of Public Subnet 1",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet1"] }
+    },
+	  
+		"VaultPublicSubnet2" :
+	  {
+      "Description": "ID of Public Subnet 2",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet2"] }
+    },
+    
+    "VaultPublicSubnet3" :
+	  {
+      "Description": "ID of Public Subnet 3",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet3"] }
+    },
+	
+	  "VaultPrivateSubnet1" :
+	  {
+      "Description": "ID of Private Subnet 1",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] }
+    },
+    
+    "VaultPrivateSubnet1Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 1? yes/no",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1Toggle"] }
+    },
+    
+  	"VaultPrivateSubnet2" :
+	  {
+      "Description": "ID of Private Subnet 2",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] }
+    },
+    
+    "VaultPrivateSubnet2Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 2? yes/no",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2Toggle"] }
+    },
+    
+    "VaultPrivateSubnet3" :
+	  {
+      "Description": "ID of Private Subnet 3",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] }
+    },
+    
+    "VaultPrivateSubnet3Toggle" :
+	  {
+      "Description": "Should we Deploy Private Subnet 3? yes/no",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3Toggle"] }
+    },
+    
+    "VaultPublicSG" :
+	  {
+      "Description": "Vault Public Instance Security Group",
+      "Value" : { "Ref" : "VaultPublicInstanceSecurityGroup"}
+    },
+    
+    "VaultPrivateSG" :
+	  {
+      "Description": "Vault Private Instance Security Group",
+      "Value" : { "Ref" : "VaultPrivateInstanceSecurityGroup"}
+    }
+	  
   }
 }

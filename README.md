@@ -47,12 +47,15 @@ To do:
 
 ## The client application ##
 
+A complement this reference infrastructure, there is a [sample Vault-aware application](https://github.com/mike-goodwin/aws-vault-reference-application).
+The app shows how to dynamically fetch DB credentials and handle Vault lease renewals.
+
 To do:
 
-* Making the app "vault aware"
-* Dynamic privilege elevation
+* Dynamic privilege elevation when fetching credentials
 
 ## About the authors ##
-We are not affiliated to Hashicorp or the Vault project in any way and any recommendations made are our own and not endorsed by Hashicorp. We just like Vault, AWS, security and messing about with cool tech :-)
+We are not affiliated to Hashicorp or the Vault project in any way and any recommendations made are our own and not endorsed by Hashicorp. 
+We just like Vault, AWS, security and messing about with cool tech :-)
 
 

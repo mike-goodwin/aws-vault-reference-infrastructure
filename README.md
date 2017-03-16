@@ -12,7 +12,7 @@ Vault is a good fit for a few use cases. The main one we are looking at is for a
 
 Here is the overall architecture:
 
-![Architecure Overview](/images/Vault Reference Architecture.png)
+![Architecure Overview](https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/images/Vault Reference Architecture.png)
 
 Some key features:
 

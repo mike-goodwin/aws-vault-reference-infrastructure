@@ -5,6 +5,6 @@
 	  },
   	{
     	"ParameterKey": "VaultIngressCIDR",
-		  "ParameterValue": "77.99.240.119/32"
+		  "ParameterValue": "77.97.82.48/32"
   	}
 ]

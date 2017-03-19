@@ -199,8 +199,31 @@
       
     },
     
+    "VaultEC2Access" :
+    {
+        "Type" : "AWS::EC2::Instance",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : "ami-70edb016",
+          "InstanceType" : "t2.micro",
+          "KeyName" : "palindrome_2017",
+          "NetworkInterfaces": [
+          {
+                "AssociatePublicIpAddress": true,
+                "DeleteOnTermination": true,
+                "DeviceIndex": "0",
+                "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet1"] },
+                "GroupSet" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPublicSG"] }]
+            }
+          ],
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_public_access_instance" } ]
+        }
+    },
+    
     "VaultEC2Instance1" :
-      {
+    {
         "Type" : "AWS::EC2::Instance",
         "Properties" :
         {
@@ -211,10 +234,23 @@
           "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
           "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
           "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
-          "Tags" : [ { "Key" : "Name", "Value" : "private_instance" } ]
-	   
-        }
-      }
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_private_instance" } ],
+          "UserData" :
+             {
+               "Fn::Base64" : { "Fn::Join" : [ "",
+                ["#!/bin/bash -v\n",
+                "sudo yum -y update\n",
+                "sudo wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "sudo unzip vault_0.7.0_linux_amd64.zip\n",
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "sudo mkdir ~/bin\n",
+                "sudo mv $(pwd)/vault $(pwd)/bin\n"
+              ]
+              ] }
+            }
+         }
+	 
+    }
       
       
       

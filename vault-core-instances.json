@@ -240,11 +240,13 @@
                "Fn::Base64" : { "Fn::Join" : [ "",
                 ["#!/bin/bash -v\n",
                 "sudo yum -y update\n",
+                "sudo mkdir -p /opt/vault/\n",
+                "builtin cd /opt/vault/\n",
                 "sudo wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "sudo wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
+                "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
                 "sudo unzip vault_0.7.0_linux_amd64.zip\n",
-                "sudo rm vault_0.7.0_linux_amd64.zip\n",
-                "sudo mkdir ~/bin\n",
-                "sudo mv $(pwd)/vault $(pwd)/bin\n"
+                "sudo rm vault_0.7.0_linux_amd64.zip\n"
               ]
               ] }
             }

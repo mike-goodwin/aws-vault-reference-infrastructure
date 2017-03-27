@@ -187,7 +187,7 @@
           {
            "Effect" : "Allow",
            "Action" : [
-             "ec2:*",
+             "ec2:RunInstances",
              "dynamodb:DescribeTable",
              "dynamodb:CreateTable"
            ],

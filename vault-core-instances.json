@@ -187,7 +187,9 @@
           {
            "Effect" : "Allow",
            "Action" : [
-             "ec2:*"
+             "ec2:*",
+             "dynamodb:DescribeTable",
+             "dynamodb:CreateTable"
            ],
            "Resource" : "*"
           }
@@ -246,7 +248,8 @@
                 "sudo wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
                 "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
                 "sudo unzip vault_0.7.0_linux_amd64.zip\n",
-                "sudo rm vault_0.7.0_linux_amd64.zip\n"
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n"
               ]
               ] }
             }

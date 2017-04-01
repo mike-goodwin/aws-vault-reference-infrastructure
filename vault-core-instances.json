@@ -250,7 +250,14 @@
                 "sudo rm vault_0.7.0_linux_amd64.zip\n",
                 "builtin cd /usr/local/etc/\n",
                 "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n",
-                "sudo easy_install supervisor\n"
+                "sudo easy_install supervisor\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord.conf\n",
+                "builtin cd /etc/init.d/\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord\n",
+                "sudo chmod +x /etc/init.d/supervisord\n",
+                "sudo chkconfig --add supervisord\n",
+                "sudo service supervisord start\n"
                 
               ]
               ] }

@@ -8,12 +8,6 @@
 
 	"Parameters" :
 	{
-      "VaultIngressCIDR" :
-      {
-        "Description" : "CIDR for Vault Reference VPC",
-        "Type" : "String",
-        "Default" : "77.99.240.119/32"
-      },
 
       "VaultStackName":
       {
@@ -162,7 +156,7 @@
                 "IpProtocol" : "tcp",
                 "FromPort" : "22",
                 "ToPort" : "22",
-                "CidrIp" : { "Ref" : "VaultIngressCIDR" }
+                "CidrIp" : { "Fn::GetAtt" : ["NetworkInfo","VaultCIDRBastionAccess"] }
             }],
             
             "SecurityGroupEgress" : [{

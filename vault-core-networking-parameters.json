@@ -38,5 +38,9 @@
   	{
     	"ParameterKey": "DeployVaultPrivateSubnet4",
 		  "ParameterValue": "no"
+  	},
+  	{
+    	"ParameterKey": "VaultIngressCIDR",
+		  "ParameterValue": "77.97.82.48/32"
   	}
 ]

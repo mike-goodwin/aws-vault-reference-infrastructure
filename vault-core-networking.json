@@ -84,6 +84,13 @@
         "Description" : "Decision to Deploy or not to Deploy this Private Subnet 4.",
         "Type" : "String",
         "Default" : "yes"
+      },
+      
+      "VaultIngressCIDR" :
+      {
+        "Description" : "CIDR for Vault Reference VPC",
+        "Type" : "String",
+        "Default" : "77.97.82.48/32"
       }
       
 	},
@@ -446,8 +453,13 @@
 	  {
       "Description": "Should we Deploy Private Subnet 3? yes/no",
       "Value" : { "Ref" : "DeployVaultPrivateSubnet3" }
-    }
+    },
     
+    "VaultCIDRBastionAccess" :
+	  {
+      "Description": "CIDR of IP used for access to Bastion host",
+      "Value" : { "Ref" : "VaultIngressCIDR" }
+    }
 	  
 	  
 	}

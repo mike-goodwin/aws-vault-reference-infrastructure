@@ -1,6 +1,0 @@
-[
-    {
-		  "ParameterKey": "VaultChildStackName",
-		  "ParameterValue": "Hashicorp-Vault-Reference-Security"
-	  }
-]

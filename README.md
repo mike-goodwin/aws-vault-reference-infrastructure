@@ -58,4 +58,34 @@ To do:
 We are not affiliated to Hashicorp or the Vault project in any way and any recommendations made are our own and not endorsed by Hashicorp. 
 We just like Vault, AWS, security and messing about with cool tech :-)
 
+---
+## Installation Prerequisites
+
+There are a couple of things you need to satisfy before you can deploy the Vault Reference Infrastructure in your own AWS account;
+
+* **An AWS Account** - You can set up an account by following the instructions [here].(https://aws.amazon.com/account/)
+* **AWS CLI** - This deployment uses the CLI to automate the build process (it doesn't use the console at all), so you will need to configure this before attempting the deploy.  Full instructions to configure this are located [here](http://docs.aws.amazon.com/cli/latest/userguide/installing.html). 
+
+## Installation Files
+
+The files required for the installation (and are located in this GitHub repository) are listed below;
+
+| File Name | Description |
+|-----------|-------------|
+| setup.sh  |  A Bash script which makes the set up of variables much easier.  It's been tested on Linux but should also work on all macOS and OSX versions.  A Powershell script will also be added for ease of Installation on Windows machines.|
+|vault-core-networking.json | This is the first Cloudformation template which generates all of the basic networking required (VPCs, subnets and gateways.)  |
+|vault-core-networking-parameters.json | This file contains all of the parameters which you will need to change to deploy the system within your AWS infrastructure.  These include the VPC CIDR address, Choice of AWS Region Availability Zones, Subnet CIDR addresses and your IP address for connecting into the Vault servers if required.   |
+|vault-core-security.json | The Cloudformation template that handles Security Groups and Network ACLs. |
+|vault-core-instances.json | The Cloudformation template which generates the EC2 instances, AutoScaling Groups and ELBs.|
+|config.hcl | Basic config file for DynamoDB creation.  You will only need to change the AWS Region to where you require DynamoDB to be created (The default is EU-West-1.) |
+|supervisord.conf | This is the Supervisord config file which allows Vault to run automatically upn deploy.|
+|supervisord | The init.d script for Supervisord to start. |
+
+
+
+
+
+
+
+
 

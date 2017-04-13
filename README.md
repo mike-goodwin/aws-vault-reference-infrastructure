@@ -20,6 +20,7 @@ Some key features:
 * The storage backend must also support HA (we have chosen [DynamoDB](https://www.vaultproject.io/docs/config/#dynamodb))
 * The [MySQL secret backend](https://www.vaultproject.io/docs/secrets/mssql/index.html) generates credentials on the fly so it needs access to the DB. We are using VPG Gateways to lock down access to the DB
 * We are using the [AWS EC2 Auth backend](https://www.vaultproject.io/docs/auth/aws-ec2.html) so that we can make use of [IAM roles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html) to control access to the Vault
+* For better isolation and defense-in-depth, the architecture supports applications in different AWS accounts and the Vault servers in yet another AWS account 
 
 ## Infrastructure ##
 
@@ -38,12 +39,16 @@ To do:
 * Audit backend
 * MySQL secret backend
 
-## IAM policies ##
+## IAM roles and policies and Vault permissions ##
+The overall identitiy flow is like this:
+![Architecure Overview](https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/images/aws%20vault%20reference%20id%20flow.PNG)
+### IAM for Application Servers ###
+Vault will be configured to use the [AWS EC2 Auth backend](https://www.vaultproject.io/docs/auth/aws-ec2.html) so each application server will launch into an instance profile IAM role. We have called this `AppNInstanceProfile` - a different profile is needed for each application if they are in different accounts. There are no special IAM polciy requirements for this role. It just needs whatever is required for the application to run. In the case of the sampel application, this is nothing.
+### IAM for Vault Servers ###
+The Vault servers are launched using an IAM role called `VaultServer`. In order to authenticate requests for credentials from the application servers, it needs to make calls to IAM for each of the application AWS accounts. In each application account this needs a role `AppNVault` with permissions `ec2:DescribeInstances` and `iam:GetInstanceProfile`. The `VaultServer` role then needs `sts:AssumeRole` for each of these roles.
+### Vault Permissions ###
+For better isolation, each application has a dedicated secret backend mounted in Vault. Only the appropriate application server instance profile is allowed to call each secret backend.
 
-To do:
-
-* Normal privilege
-* High privilege
 
 ## The client application ##
 

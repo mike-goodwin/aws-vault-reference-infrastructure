@@ -58,10 +58,10 @@ We are not affiliated to Hashicorp or the Vault project in any way and any recom
 ---
 ## Installation Prerequisites
 
-There are a couple of things you need to satisfy before you can deploy the Vault Reference Infrastructure in your own AWS account;
+There are a couple of things you need to satisfy before you can deploy the Vault Reference Infrastructure in your own AWS environment;
 
-* **An AWS Account** - You can set up an account by following the instructions [here].(https://aws.amazon.com/account/)
-* **AWS CLI** - This deployment uses the CLI to automate the build process (it doesn't use the console at all), so you will need to configure this before attempting the deploy.  Full instructions to configure this are located [here](http://docs.aws.amazon.com/cli/latest/userguide/installing.html). 
+* **An AWS Account** - You can set up an account by following the instructions listed [here](https://aws.amazon.com/account/). At the moment one account will suffice, but the final deployment will utilise two separate AWS accounts with one VPC in each.  The account creation is the only thing that cannot be automated.
+* **AWS CLI** - This deployment uses the CLI to automate the build process, so you will need to install and configure this before attempting the deploy.  Full instructions to install the CLI tools are located [here](http://docs.aws.amazon.com/cli/latest/userguide/installing.html), with configuration instructions located [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).
 
 ## Installation Files
 
@@ -78,6 +78,54 @@ The files required for the installation (and are located in this GitHub reposito
 |supervisord.conf | This is the Supervisord config file which allows Vault to run automatically upn deploy.|
 |supervisord | The init.d script for Supervisord to start. |
 
+## Installation Process
+
+Once you have created the AWS account, you will need to create an IAM user (with ability to run the Cloudformation templates and create AWS services) and also download the associated SSH key (which is used to SSH onto the Bastion and Vault Servers.)
+
+You will have two files located in the <code>~/.aws/</code> directory called <code>config</code> and <code>credentials</code>.  The contents of the <code>credentials</code> file will look similar to;
+
+<pre><code>[default]
+aws_access_key_id = AKIGHSJJKKKLKLLAKHJK
+aws_secret_access_key = k/wKqksafjejfhkhadflkjlixjklqnekdm;lw8Xd
+</code></pre>
+
+You don't need to know anything in this file, other than what is between the square brackets, in this case <code>[default]</code>.  This is the profile name and will be used later when the setup script is run.
+
+The next step is to clone the GitHub repository to your local machine, using the following command;
+
+<code>
+https://github.com/mike-goodwin/aws-vault-reference-infrastructure.git
+</code>
+
+Locate the file called <code>setup.sh</code> (you may need to set the file executable bit using <code>chmod +x setup.sh</code>) and then run it.  You will see the following;
+
+<pre>---------------------------------------------------------------------------------------
+AWS VAULT REFERENCE INSTALLATION
+---------------------------------------------------------------------------------------
+Select from the following options...
+
+<pre>1. VALIDATE CLOUDFORMATION TEMPLATES
+2. BUILD CLOUDFORMATION STACK
+0. Quit
+
+Enter Selection [0-2]</pre></pre>
+
+Press 1, if you want to check that all of the templates downloaded are syntactically correct before deploying.
+
+To deploy the whole Cloudformation Stack, press 2 and you will see;
+
+<pre>---------------------------------------------------------------------------------------
+BUILD CLOUDFORMATION STACK
+---------------------------------------------------------------------------------------
+Enter the name of the AWS profile you wish to use (Leave blank for 'default' profile)...
+
+default
+
+Enter the name of the Cloudformation Stack...
+
+Vault Reference Stack</pre>
+
+Type the name of the profile in the first field (the one in the square brackets of the credentials file) and in the second field, type in any name or phrase you wish to call the Cloudformation Stack.  The Stack will then build (this will take some time) and providing everything goes well, the Vault side of the infrastructure will be built and will be running.
 
 
 

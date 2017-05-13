@@ -66,6 +66,17 @@ There are a couple of things you need to satisfy before you can deploy the Vault
 * **An AWS Account** - You can set up an account by following the instructions listed [here](https://aws.amazon.com/account/). At the moment one account will suffice, but the final deployment will utilise two separate AWS accounts with one VPC in each.  The account creation is the only thing that cannot be automated.
 * **AWS CLI** - This deployment uses the CLI to automate the build process, so you will need to install and configure this before attempting the deploy.  Full instructions to install the CLI tools are located [here](http://docs.aws.amazon.com/cli/latest/userguide/installing.html), with configuration instructions located [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html).
 
+Once you have created the AWS account, you will need to create an IAM user (with ability to run the Cloudformation templates and create AWS services) and also download the associated SSH key (which is used to SSH onto the Bastion and Vault Servers.)
+
+You will have two files located in the <code>~/.aws/</code> directory called <code>config</code> and <code>credentials</code>.  The contents of the <code>credentials</code> file will look similar to;
+
+<pre><code>[default]
+aws_access_key_id = AKIGHSJJKKKLKLLAKHJK
+aws_secret_access_key = k/wKqksafjejfhkhadflkjlixjklqnekdm;lw8Xd
+</code></pre>
+
+You don't need to know anything in this file, other than what is between the square brackets, in this case <code>[default]</code>.  This is the profile name and will be used later when the setup script is run.
+
 ## Installation Files
 
 The files required for the installation (and are located in this GitHub repository) are listed below;
@@ -81,26 +92,25 @@ The files required for the installation (and are located in this GitHub reposito
 |supervisord.conf | This is the Supervisord config file which allows Vault to run automatically upn deploy.|
 |supervisord | The init.d script for Supervisord to start. |
 
-## Installation Process
+## Download and Configuration
 
-Once you have created the AWS account, you will need to create an IAM user (with ability to run the Cloudformation templates and create AWS services) and also download the associated SSH key (which is used to SSH onto the Bastion and Vault Servers.)
-
-You will have two files located in the <code>~/.aws/</code> directory called <code>config</code> and <code>credentials</code>.  The contents of the <code>credentials</code> file will look similar to;
-
-<pre><code>[default]
-aws_access_key_id = AKIGHSJJKKKLKLLAKHJK
-aws_secret_access_key = k/wKqksafjejfhkhadflkjlixjklqnekdm;lw8Xd
-</code></pre>
-
-You don't need to know anything in this file, other than what is between the square brackets, in this case <code>[default]</code>.  This is the profile name and will be used later when the setup script is run.
-
-The next step is to clone the GitHub repository to your local machine, using the following command;
+The first step to deploy, is to clone the GitHub repository to your local machine, using the following command (you will need git installed and running locally, which is out of scope for this document);
 
 <code>
-https://github.com/mike-goodwin/aws-vault-reference-infrastructure.git
+git clone https://github.com/mike-goodwin/aws-vault-reference-infrastructure.git
 </code>
 
-Locate the file called <code>setup.sh</code> (you may need to set the file executable bit using <code>chmod +x setup.sh</code>) and then run it.  You will see the following;
+Once this has been cloned locally, all of the parameters that you may possibly need to change are in one file called <code>vault-core-networking-parameters.json</code>.  Although all options can be changed, the ones you especially need to pay attention to, are listed at the end of the file;
+
+| Parameter Key | Parameter Value | Description |
+|---------------|-----------------|-------------|
+| VaultIngressCIDR | 77.97.82.48/32 | In order to SSH into the Vault servers, you are required to use a Bastion server sitting in a public subnet to 'hop' onto and from there, connect to the Vault servers.  This Bastion server is locked down to a single IP address which is the address that you are connecting to the Internet from (Go to https://ifconfig.co to get this value) and replace the existing CIDR address. |
+| VaultCoreEC2AMI | ami-70edb016 | If you are deploying to any region other than EU-WEST-1, you will need to change this to reflect an AMI in your region |
+| VaultEC2KeyPair | palindrome_2017 | This is the name of your AWS SSH key which you should have downloaded when creating your AWS IAM User Account (described above) |
+
+## Installation Process
+
+The final step is to actually deploy the full Stack.  To do this, locate the file called <code>setup.sh</code> ( This will be in the local git repository you cloned earlier and you may need to set the file executable bit using <code>chmod +x setup.sh</code>) and then run it.  You will see the following;
 
 <pre>---------------------------------------------------------------------------------------
 AWS VAULT REFERENCE INSTALLATION
@@ -129,6 +139,8 @@ Enter the name of the Cloudformation Stack...
 Vault Reference Stack</pre>
 
 Type the name of the profile in the first field (the one in the square brackets of the credentials file) and in the second field, type in any name or phrase you wish to call the Cloudformation Stack.  The Stack will then build (this will take some time) and providing everything goes well, the Vault side of the infrastructure will be built and will be running.
+
+
 
 
 

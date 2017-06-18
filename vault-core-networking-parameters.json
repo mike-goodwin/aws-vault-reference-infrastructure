@@ -4,43 +4,67 @@
 		  "ParameterValue": "10.0.0.0/16"
 	  },
   	{
-    	"ParameterKey": "AvailabilityZones",
-		  "ParameterValue": "eu-west-1a,eu-west-1b,eu-west-1c"
+    	"ParameterKey": "CIDRForPublicSubnet1",
+		  "ParameterValue": "10.0.0.0/27"
   	},
   	{
-    	"ParameterKey": "CIDRForVaultPrivateSubnet1",
+    	"ParameterKey": "CIDRForPublicSubnet2",
+		  "ParameterValue": "10.0.0.32/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForPublicSubnet3",
+		  "ParameterValue": "10.0.0.64/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForPublicSubnet4",
 		  "ParameterValue": "10.0.0.96/27"
   	},
   	{
-    	"ParameterKey": "DeployVaultPrivateSubnet1",
-		  "ParameterValue": "yes"
-  	},
-  	{
-    	"ParameterKey": "CIDRForVaultPrivateSubnet2",
+    	"ParameterKey": "CIDRForPublicSubnet5",
 		  "ParameterValue": "10.0.0.128/27"
   	},
   	{
-    	"ParameterKey": "DeployVaultPrivateSubnet2",
-		  "ParameterValue": "yes"
-  	},
-  	{
-    	"ParameterKey": "CIDRForVaultPrivateSubnet3",
+    	"ParameterKey": "CIDRForVaultPrivateSubnet1",
 		  "ParameterValue": "10.0.0.160/27"
   	},
   	{
-    	"ParameterKey": "DeployVaultPrivateSubnet3",
-		  "ParameterValue": "yes"
-  	},
-  	{
-    	"ParameterKey": "CIDRForVaultPrivateSubnet4",
+    	"ParameterKey": "CIDRForVaultPrivateSubnet2",
 		  "ParameterValue": "10.0.0.192/27"
   	},
   	{
-    	"ParameterKey": "DeployVaultPrivateSubnet4",
-		  "ParameterValue": "no"
+    	"ParameterKey": "CIDRForVaultPrivateSubnet3",
+		  "ParameterValue": "10.0.0.224/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForVaultPrivateSubnet4",
+		  "ParameterValue": "10.0.1.0/27"
+  	},
+  	{
+    	"ParameterKey": "CIDRForVaultPrivateSubnet5",
+		  "ParameterValue": "10.0.1.32/27"
   	},
   	{
     	"ParameterKey": "VaultIngressCIDR",
-		  "ParameterValue": "77.97.82.48/32"
-  	}
+		  "ParameterValue": "195.10.20.30/32"
+  	},
+  	{
+    	"ParameterKey": "NumberOfSubnetNodes",
+		  "ParameterValue": "2"
+  	},
+    {
+      "ParameterKey": "VaultCoreEC2AMI",
+		  "ParameterValue": "ami-70edb016"
+    },
+    {
+      "ParameterKey": "VaultCoreEC2InstanceType",
+		  "ParameterValue": "t2.micro"
+    },
+    {
+      "ParameterKey": "VaultEC2KeyPair",
+		  "ParameterValue": "my_ec2_key"
+    },
+    {
+      "ParameterKey": "RequesterAccountNumber",
+		  "ParameterValue": "123456789012"
+    }
 ]

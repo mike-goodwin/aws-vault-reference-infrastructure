@@ -1,10 +1,6 @@
 {
 "AWSTemplateFormatVersion" : "2010-09-09",
-"Description" : "Hashicorp Vault Reference: Core EC2 Instances: This template creates the EC2 instances used to run Hashicorp Vault.",
-
-	"Metadata" :
-	{
-	},
+"Description" : "HASHICORP VAULT REFERENCE (Core Instances Infrastructure) - Creates a Bastion server in one of the Public subnets and an Vault EC2 instance in each of the Private subnets.",
 
 	"Parameters" :
 	{
@@ -13,17 +9,61 @@
       {
         "Description": "Name of the stack containing the vault security",
         "Type": "String"
+      },
+      
+      "NumberOfSubnetNodes" :
+      {
+        "Description" : "Vault Core Infrastructure - Default, Min and Max Values for Number of Subnets (and therefore Instances) created to serve the Vault Core Software",
+        "Type" : "Number",
+        "Default" : 2,
+        "MinValue" : 2,
+        "MaxValue" : 5
       }
   
   },
 
 	"Mappings" :
 	{
+	  
+	    "RegionAZMap" :
+      {
+          "us-east-1" : { "1" : "us-east-1a", "2" : "us-east-1b", "3" : "us-east-1c", "4" : "us-east-1d", "5" : "us-east-1e" },
+          "us-east-2" : { "1" : "us-east-2a", "2" : "us-east-2b", "3" : "us-east-2c" },
+          "us-west-1" : { "1" : "us-west-1b", "2" : "us-west-1c" },
+          "us-west-2" : { "1" : "us-west-2a", "2" : "us-west-2b", "3" : "us-west-2c" },
+          "ca-central-1" : { "1" : "ca-central-1a", "2" : "ca-central-1b" },
+          "eu-west-1" : { "1" : "eu-west-1a", "2" : "eu-west-1b", "3" : "eu-west-1c"  },
+          "eu-central-1" : { "1" : "eu-central-1a", "2" : "eu-central-1b" },
+          "eu-west-2" : { "1" : "eu-west-2a", "2" : "eu-west-2b" },
+          "ap-southeast-1" : { "1" : "ap-southeast-1a", "2" : "ap-southeast-1b"  },
+          "ap-southeast-2" : { "1" : "ap-southeast-2a", "2" : "ap-southeast-2b", "3" : "ap-southeast-2c" },
+          "ap-northeast-2" : { "1" : "ap-northeast-2a", "2" : "ap-northeast-2c" },
+          "ap-northeast-1" : { "1" : "ap-northeast-1a", "2" : "ap-northeast-1c" },
+          "ap-south-1" : { "1" : "ap-south-1a", "2" : "ap-south-1b" },
+          "sa-east-1" : { "1" : "sa-east-1a", "2" : "sa-east-1b", "3" : "sa-east-1c" }
+      }
+
   },
 
-	"Conditions" :
+  "Conditions" :
 	{
-  },
+	      "CreateNode5" :
+	      { "Fn::Equals" :
+            [ { "Ref" : "NumberOfSubnetNodes" }, 5 ]
+	      },
+        "CreateNode4" :
+        { "Fn::Or" :
+            [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 4 ] }, { "Condition" : "CreateNode5" }]
+        },
+        "CreateNode3" :
+        { "Fn::Or" :
+            [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 3 ] }, { "Condition" : "CreateNode4" }]
+        },
+        "CreateNode2" :
+        { "Fn::Or" :
+            [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 2 ] }, { "Condition" : "CreateNode3" }]
+        }
+	},
 
 	"Resources" :
   {
@@ -164,8 +204,8 @@
         }
       }
     },
-
-    "VaultEC2InstanceProfile" :
+    
+   "VaultEC2InstanceProfile" :
     {
       "Type" : "AWS::IAM::InstanceProfile",
       "Properties" :
@@ -174,7 +214,7 @@
         "Roles" : [{ "Ref" : "VaultEC2InstanceRole" }]
       }
     },
-
+    
     "VaultEC2InstancePolicy" :
     {
       "Type" : "AWS::IAM::Policy",
@@ -207,9 +247,9 @@
         "Properties" :
         {
           "EbsOptimized" : "false",
-          "ImageId" : "ami-70edb016",
-          "InstanceType" : "t2.micro",
-          "KeyName" : "palindrome_2017",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
           "NetworkInterfaces": [
           {
                 "AssociatePublicIpAddress": true,
@@ -223,16 +263,16 @@
           "Tags" : [ { "Key" : "Name", "Value" : "vault_public_access_instance" } ]
         }
     },
-    
+
     "VaultEC2Instance1" :
     {
         "Type" : "AWS::EC2::Instance",
         "Properties" :
         {
           "EbsOptimized" : "false",
-          "ImageId" : "ami-70edb016",
-          "InstanceType" : "t2.micro",
-          "KeyName" : "palindrome_2017",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
           "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
           "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
           "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
@@ -264,13 +304,376 @@
             }
          }
 	 
+    },
+ 
+    "VaultEC2Instance2" :
+    {
+        "Type" : "AWS::EC2::Instance",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
+          "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
+          "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] },
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_private_instance" } ],
+          "UserData" :
+             {
+               "Fn::Base64" : { "Fn::Join" : [ "",
+                ["#!/bin/bash -v\n",
+                "sudo yum -y update\n",
+                "builtin cd /usr/local/bin/\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
+                "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
+                "unzip vault_0.7.0_linux_amd64.zip\n",
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n",
+                "sudo easy_install supervisor\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord.conf\n",
+                "builtin cd /etc/init.d/\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord\n",
+                "sudo chmod +x /etc/init.d/supervisord\n",
+                "sudo chkconfig --add supervisord\n",
+                "sudo service supervisord start\n"
+                
+              ]
+              ] }
+            }
+         }
+    },
+    
+    "VaultEC2Instance3" :
+    {
+        "Type" : "AWS::EC2::Instance",
+        "Condition" : "CreateNode3",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
+          "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
+          "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] },
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_private_instance" } ],
+          "UserData" :
+             {
+               "Fn::Base64" : { "Fn::Join" : [ "",
+                ["#!/bin/bash -v\n",
+                "sudo yum -y update\n",
+                "builtin cd /usr/local/bin/\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
+                "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
+                "unzip vault_0.7.0_linux_amd64.zip\n",
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n",
+                "sudo easy_install supervisor\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord.conf\n",
+                "builtin cd /etc/init.d/\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord\n",
+                "sudo chmod +x /etc/init.d/supervisord\n",
+                "sudo chkconfig --add supervisord\n",
+                "sudo service supervisord start\n"
+                
+              ]
+              ] }
+            }
+         }
+    },
+    
+    "VaultEC2Instance4" :
+    {
+        "Type" : "AWS::EC2::Instance",
+        "Condition" : "CreateNode4",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
+          "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
+          "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet4"] },
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_private_instance" } ],
+          "UserData" :
+             {
+               "Fn::Base64" : { "Fn::Join" : [ "",
+                ["#!/bin/bash -v\n",
+                "sudo yum -y update\n",
+                "builtin cd /usr/local/bin/\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
+                "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
+                "unzip vault_0.7.0_linux_amd64.zip\n",
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n",
+                "sudo easy_install supervisor\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord.conf\n",
+                "builtin cd /etc/init.d/\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord\n",
+                "sudo chmod +x /etc/init.d/supervisord\n",
+                "sudo chkconfig --add supervisord\n",
+                "sudo service supervisord start\n"
+                
+              ]
+              ] }
+            }
+         }
+    },
+    
+    "VaultEC2Instance5" :
+    {
+        "Type" : "AWS::EC2::Instance",
+        "Condition" : "CreateNode5",
+        "Properties" :
+        {
+          "EbsOptimized" : "false",
+          "ImageId" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] },
+          "InstanceType" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] },
+          "KeyName" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] },
+          "SecurityGroupIds" : [{ "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }],
+          "SubnetId" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet5"] },
+          "IamInstanceProfile" : { "Ref" : "VaultEC2InstanceProfile"},
+          "Tags" : [ { "Key" : "Name", "Value" : "vault_private_instance" } ],
+          "UserData" :
+             {
+               "Fn::Base64" : { "Fn::Join" : [ "",
+                ["#!/bin/bash -v\n",
+                "sudo yum -y update\n",
+                "builtin cd /usr/local/bin/\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip\n",
+                "wget https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_SHA256SUMS\n",
+                "sha256sum -c vault_0.7.0_SHA256SUMS 2>&1 | grep OK\n",
+                "unzip vault_0.7.0_linux_amd64.zip\n",
+                "sudo rm vault_0.7.0_linux_amd64.zip\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/config.hcl\n",
+                "sudo easy_install supervisor\n",
+                "builtin cd /usr/local/etc/\n",
+                "wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord.conf\n",
+                "builtin cd /etc/init.d/\n",
+                "sudo wget https://raw.githubusercontent.com/mike-goodwin/aws-vault-reference-infrastructure/master/supervisord\n",
+                "sudo chmod +x /etc/init.d/supervisord\n",
+                "sudo chkconfig --add supervisord\n",
+                "sudo service supervisord start\n"
+                
+              ]
+              ] }
+            }
+         }
+    },
+    
+    "VaultInternalELB2Nodes" :
+    {
+        "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Condition" : "CreateNode2",
+        "Properties" :
+        {
+  
+          "CrossZone" : "true",
+          "Instances" : [ { "Ref" : "VaultEC2Instance1" },{ "Ref" : "VaultEC2Instance2" } ],
+          "Listeners" : [ { "LoadBalancerPort" : "8200", "InstancePort" : "8200" ,"Protocol" : "TCP"} ],
+          "Subnets" : [
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] }
+                      ]
+        }
+      
+    },
+    
+    "VaultInternalELB3Nodes" :
+    {
+        "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Condition" : "CreateNode3",
+        "Properties" :
+        {
+  
+          "CrossZone" : "true",
+          "Instances" : [ { "Ref" : "VaultEC2Instance1" },{ "Ref" : "VaultEC2Instance2" },{ "Ref" : "VaultEC2Instance3" } ],
+          "Listeners" : [ { "LoadBalancerPort" : "8200", "InstancePort" : "8200" ,"Protocol" : "TCP"} ],
+          "Subnets" : [
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] }
+                      ]
+        }
+      
+    },
+    
+    "VaultInternalELB4Nodes" :
+    {
+        "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Condition" : "CreateNode4",
+        "Properties" :
+        {
+  
+          "CrossZone" : "true",
+          "Instances" : [ { "Ref" : "VaultEC2Instance1" },{ "Ref" : "VaultEC2Instance2" },{ "Ref" : "VaultEC2Instance3" },{ "Ref" : "VaultEC2Instance4" } ],
+          "Listeners" : [ { "LoadBalancerPort" : "8200", "InstancePort" : "8200" ,"Protocol" : "TCP"} ],
+          "Subnets" : [
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet4"] }
+                      ]
+        }
+      
+    },
+    
+    "VaultInternalELB5Nodes" :
+    {
+        "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+        "Condition" : "CreateNode5",
+        "Properties" :
+        {
+  
+          "CrossZone" : "true",
+          "Instances" : [ { "Ref" : "VaultEC2Instance1" },{ "Ref" : "VaultEC2Instance2" },{ "Ref" : "VaultEC2Instance3" },{ "Ref" : "VaultEC2Instance4" },{ "Ref" : "VaultEC2Instance5" } ],
+          "Listeners" : [ { "LoadBalancerPort" : "8200", "InstancePort" : "8200" ,"Protocol" : "TCP"} ],
+          "Subnets" : [
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet4"] },
+                        { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet5"] }
+                      ]
+        }
+      
     }
-      
-      
       
   },
 
 	"Outputs" :
 	{
+
+	  "VaultRefVPC":
+		{
+		  "Description": "VAULT CORE REFERENCE: VPC ID",
+	   "Value": { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] }
+	  },
+	  "VaultPublicSubnet1" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 1",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet1"] }
+    },
+	  
+		"VaultPublicSubnet2" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 2",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet2"] }
+    },
+    
+		"VaultPublicSubnet3" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 3",
+      "Condition" : "CreateNode3",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet3"] }
+    },
+    
+		"VaultPublicSubnet4" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet4"] }
+    },
+    
+		"VaultPublicSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet5"] }
+    },
+    
+	  "VaultPrivateSubnet1" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 1",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] }
+    },
+    
+    "VaultPrivateSubnet2" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 2",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] }
+    },
+    
+    "VaultPrivateSubnet3" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 3",
+      "Condition" : "CreateNode3",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] }
+    },
+    
+    "VaultPrivateSubnet4" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet4"] }
+    },
+    
+    "VaultPrivateSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet5"] }
+    },
+    
+    "VaultCIDRBastionAccess" :
+	  {
+      "Description": "VAULT CORE REFERENCE: CIDR of IP used for access to Bastion host",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultCIDRBastionAccess"] }
+    },
+    
+    "VaultImageID" :
+    {
+      "Description": "VAULT CORE REFERENCE: Image ID of AMI used for Vault Core Infrastructure",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] }
+    },
+    
+    "VaultInstanceType" :
+    {
+      "Description": "VAULT CORE REFERENCE: Instance Type used for Vault Core Infrastructure",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] }
+    },
+    
+    "VaultEC2KeyPair" :
+    {
+      "Description": "VAULT CORE REFERENCE: Key Pair used for Vault EC2 Instances",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] }
+    },
+    
+    "VaultPublicSG" :
+	  {
+      "Description": "VAULT CORE REFERENCE: Public Instance Security Group",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSG"] }
+    },
+    
+    "VaultPrivateSG" :
+	  {
+      "Description": "VAULT CORE REFERENCE: Private Instance Security Group",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSG"] }
+    },
+    
+    "RoleName" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): Cross Account Role Name",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","RoleName"] }
+    },
+    
+    "VaultAppAWSAccount" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): AWS Account Number in which the App VPC is created",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultAppAWSAccount"] }
+    }
+
   }
 }

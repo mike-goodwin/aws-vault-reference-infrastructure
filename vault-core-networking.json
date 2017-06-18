@@ -1,6 +1,6 @@
 {
 "AWSTemplateFormatVersion" : "2010-09-09",
-"Description" : "Hashicorp Vault Reference: Core Network Infrastructure: This template creates the Private VPC for the Vault instances, between 1-4 Subnets (so it can be deployed in any region and these are enabled/disabled in the parameters), Routing Table, Routes, a NAT Gateway and Internet Gateway",
+"Description" : "HASHICORP VAULT REFERENCE (Core Network Infrastructure) - Creates a VPC, a set of Public and Private Subnets (1-5 depending on how many Availibility Zones there are in the Region), associated Routing Tables with Routes and an Internet and NAT Gateway.",
 
 	"Metadata" :
 	{
@@ -10,101 +10,134 @@
   {
       "VPCCIDR" :
       {
-        "Description" : "CIDR for Vault Reference VPC",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Server Deployment",
         "Type" : "String",
         "Default" : "10.0.0.0/16"
       },
-      "AvailabilityZones":
-      {
-        "Description": "List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved.",
-        "Type": "List<AWS::EC2::AvailabilityZone::Name>"
-      },
       "CIDRForPublicSubnet1" :
       {
-        "Description" : "CIDR for Vault Reference Public Subnet 1",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Public Subnet 1",
         "Type" : "String",
         "Default" : "10.0.0.0/27"
       },
       "CIDRForPublicSubnet2" :
       {
-        "Description" : "CIDR for Vault Reference Public Subnet 2",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Public Subnet 2",
         "Type" : "String",
         "Default" : "10.0.0.32/27"
       },
       "CIDRForPublicSubnet3" :
       {
-        "Description" : "CIDR for Vault Reference PublicSubnet 3",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Public Subnet 3",
         "Type" : "String",
         "Default" : "10.0.0.64/27"
       },
-      "CIDRForVaultPrivateSubnet1" :
+      "CIDRForPublicSubnet4" :
       {
-        "Description" : "CIDR for Vault Reference Private Subnet 1",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Public Subnet 4",
         "Type" : "String",
         "Default" : "10.0.0.96/27"
       },
-      "DeployVaultPrivateSubnet1" :
+      "CIDRForPublicSubnet5" :
       {
-        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 1.",
-        "Type" : "String",
-        "Default" : "yes"
-      },
-      "CIDRForVaultPrivateSubnet2" :
-      {
-        "Description" : "CIDR for Vault Reference Private Subnet 2",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Public Subnet 5",
         "Type" : "String",
         "Default" : "10.0.0.128/27"
       },
-      "DeployVaultPrivateSubnet2" :
+      "CIDRForVaultPrivateSubnet1" :
       {
-        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 2.",
-        "Type" : "String",
-        "Default" : "yes"
-      },
-      "CIDRForVaultPrivateSubnet3" :
-      {
-        "Description" : "CIDR for Vault Reference Private Subnet 3",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Private Subnet 1",
         "Type" : "String",
         "Default" : "10.0.0.160/27"
       },
-      "DeployVaultPrivateSubnet3" :
+      "CIDRForVaultPrivateSubnet2" :
       {
-        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 3.",
-        "Type" : "String",
-        "Default" : "yes"
-      },
-      "CIDRForVaultPrivateSubnet4" :
-      {
-        "Description" : "CIDR for Vault Reference Private Subnet 4",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Private Subnet 2",
         "Type" : "String",
         "Default" : "10.0.0.192/27"
       },
-      "DeployVaultPrivateSubnet4" :
+      "CIDRForVaultPrivateSubnet3" :
       {
-        "Description" : "Decision to Deploy or not to Deploy this Private Subnet 4.",
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Private Subnet 3",
         "Type" : "String",
-        "Default" : "yes"
+        "Default" : "10.0.0.224/27"
       },
-      
+      "CIDRForVaultPrivateSubnet4" :
+      {
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Private Subnet 4",
+        "Type" : "String",
+        "Default" : "10.0.1.0/27"
+      },
+      "CIDRForVaultPrivateSubnet5" :
+      {
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Private Subnet 5",
+        "Type" : "String",
+        "Default" : "10.0.1.32/27"
+      },
+      "NumberOfSubnetNodes" :
+      {
+        "Description" : "Vault Core Infrastructure - Default, Min and Max Values for Number of Subnets (and therefore Instances) created to serve the Vault Core Software",
+        "Type" : "Number",
+        "Default" : 2,
+        "MinValue" : 2,
+        "MaxValue" : 5
+      },
       "VaultIngressCIDR" :
       {
-        "Description" : "CIDR for Vault Reference VPC",
-        "Type" : "String",
-        "Default" : "77.97.82.48/32"
+        "Description" : "Vault Core Infrastructure - CIDR for Vault Reference VPC",
+        "Type" : "String"
+      },
+      "VaultCoreEC2AMI" :
+      {
+        "Description" : "Vault Core Infrastructure - AMI Image ID for Vault Core Instances",
+        "Type" : "String"
+      },
+      "VaultCoreEC2InstanceType" :
+      {
+        "Description" : "Vault Core Infrastructure - Instance Type for Vault Core Instances",
+        "Type" : "String"
+      },
+      "VaultEC2KeyPair" :
+      {
+        "Description" : "Vault Core Infrastructure - Key Pair used to access the Vault Instances",
+        "Type" : "String"
+      },
+      "RequesterAccountNumber" :
+      {
+        "Type"                  : "String",
+        "Description"           : "Vault Core Infrastructure - Used when connecting perring between VPCs Number of the requester account",
+        "AllowedPattern"        : "[0-9]*",
+        "ConstraintDescription" : "Must be account number without dashes"
       }
       
 	},
 
 	"Mappings" :
 	{
+	    "RegionAZMap" :
+      {
+          "us-east-1" : { "1" : "us-east-1a", "2" : "us-east-1b", "3" : "us-east-1c", "4" : "us-east-1d", "5" : "us-east-1e" },
+          "us-east-2" : { "1" : "us-east-2a", "2" : "us-east-2b", "3" : "us-east-2c" },
+          "us-west-1" : { "1" : "us-west-1b", "2" : "us-west-1c" },
+          "us-west-2" : { "1" : "us-west-2a", "2" : "us-west-2b", "3" : "us-west-2c" },
+          "ca-central-1" : { "1" : "ca-central-1a", "2" : "ca-central-1b" },
+          "eu-west-1" : { "1" : "eu-west-1a", "2" : "eu-west-1b", "3" : "eu-west-1c"  },
+          "eu-central-1" : { "1" : "eu-central-1a", "2" : "eu-central-1b" },
+          "eu-west-2" : { "1" : "eu-west-2a", "2" : "eu-west-2b" },
+          "ap-southeast-1" : { "1" : "ap-southeast-1a", "2" : "ap-southeast-1b"  },
+          "ap-southeast-2" : { "1" : "ap-southeast-2a", "2" : "ap-southeast-2b", "3" : "ap-southeast-2c" },
+          "ap-northeast-2" : { "1" : "ap-northeast-2a", "2" : "ap-northeast-2c" },
+          "ap-northeast-1" : { "1" : "ap-northeast-1a", "2" : "ap-northeast-1c" },
+          "ap-south-1" : { "1" : "ap-south-1a", "2" : "ap-south-1b" },
+          "sa-east-1" : { "1" : "sa-east-1a", "2" : "sa-east-1b", "3" : "sa-east-1c" }
+      }
 	},
 
 	"Conditions" :
 	{
-	    "PrivateSubnet1Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet1" }, "yes" ] },
-	    "PrivateSubnet2Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet2" }, "yes" ] },
-	    "PrivateSubnet3Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet3" }, "yes" ] },
-	    "PrivateSubnet4Toggle" : { "Fn::Equals" : [ { "Ref" : "DeployVaultPrivateSubnet4" }, "yes" ] }
+	    "CreateNode5" : { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 5 ]},
+      "CreateNode4" : { "Fn::Or" : [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 4 ] }, { "Condition" : "CreateNode5" }]},
+      "CreateNode3" : { "Fn::Or" : [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 3 ] }, { "Condition" : "CreateNode4" }]}
 	},
 
 	"Resources" :
@@ -118,109 +151,161 @@
         		  "CidrBlock" : { "Ref" : "VPCCIDR"} ,
         		  "Tags" :
 					    [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"}},
-						  {"Key" : "Name", "Value" : "Vault Reference VPC"}]
+						  {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: VPC"}]
       		}
    		},
    		
-  	    "VaultRefPublicSubnet1" :
+  	  "VaultRefPublicSubnet1" :
 	  	{
       		"Type" : "AWS::EC2::Subnet",
       		"Properties" :
 			    {
         			"VpcId" : { "Ref" : "VaultRefVPC" },
         			"CidrBlock" : { "Ref" : "CIDRForPublicSubnet1" },
-        			"AvailabilityZone" : { "Fn::Select": ["0",{ "Ref": "AvailabilityZones" }] },
+        			"AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "1" ] },
         			"Tags" :
 					    [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-					    {"Key" : "Name", "Value" : "Vault Reference Public Subnet 1"}]
+					    {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Subnet 1"}]
       		}
     	},
 
       "VaultRefPublicSubnet2" :
       {
           "Type" : "AWS::EC2::Subnet",
+          "DependsOn" : "VaultRefPublicSubnet1",
           "Properties" :
           {
                 "VpcId" : { "Ref" : "VaultRefVPC" },
                 "CidrBlock" : { "Ref" : "CIDRForPublicSubnet2" },
-                "AvailabilityZone" : { "Fn::Select": ["1",{ "Ref": "AvailabilityZones" }] },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "2" ] },
                 "Tags" :
                 [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-                {"Key" : "Name", "Value" : "Vault Reference Public Subnet 2"}]
+                {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Subnet 2"}]
           }
       },
-
+      
       "VaultRefPublicSubnet3" :
       {
           "Type" : "AWS::EC2::Subnet",
+          "Condition" : "CreateNode3",
+          "DependsOn" : "VaultRefPublicSubnet2",
           "Properties" :
           {
-                  "VpcId" : { "Ref" : "VaultRefVPC" },
-                  "CidrBlock" : { "Ref" : "CIDRForPublicSubnet3" },
-                  "AvailabilityZone" : { "Fn::Select": ["2",{ "Ref": "AvailabilityZones" }] },
-                  "Tags" :
-                  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-                  {"Key" : "Name", "Value" : "Vault Reference Public Subnet 3"}]
+                "VpcId" : { "Ref" : "VaultRefVPC" },
+                "CidrBlock" : { "Ref" : "CIDRForPublicSubnet3" },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "3" ] },
+                "Tags" :
+                [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+                {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Subnet 3"}]
+          }
+      },
+      
+      "VaultRefPublicSubnet4" :
+      {
+          "Type" : "AWS::EC2::Subnet",
+          "Condition" : "CreateNode4",
+          "DependsOn" : "VaultRefPublicSubnet3",
+          "Properties" :
+          {
+                "VpcId" : { "Ref" : "VaultRefVPC" },
+                "CidrBlock" : { "Ref" : "CIDRForPublicSubnet4" },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "4" ] },
+                "Tags" :
+                [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+                {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Subnet 4"}]
+          }
+      },
+
+      "VaultRefPublicSubnet5" :
+      {
+          "Type" : "AWS::EC2::Subnet",
+          "Condition" : "CreateNode5",
+          "DependsOn" : "VaultRefPublicSubnet4",
+          "Properties" :
+          {
+                "VpcId" : { "Ref" : "VaultRefVPC" },
+                "CidrBlock" : { "Ref" : "CIDRForPublicSubnet5" },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "5" ] },
+                "Tags" :
+                [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+                {"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Subnet 5"}]
           }
       },
 
     	"VaultRefPrivateSubnet1" :
 		  {
       		"Type" : "AWS::EC2::Subnet",
-      		"Condition" : "PrivateSubnet1Toggle",
       		"Properties" :
 			    {
         		"VpcId" : { "Ref" : "VaultRefVPC" },
         		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet1" },
-        		"AvailabilityZone" : { "Fn::Select": ["0",{ "Ref": "AvailabilityZones" }] },
+        		"AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "1" ] },
         		"Tags" :
 					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 1"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Subnet 1"}]
       		}
     	},
 
     	"VaultRefPrivateSubnet2" :
 		  {
       		"Type" : "AWS::EC2::Subnet",
-      		"Condition" : "PrivateSubnet2Toggle",
+      		"DependsOn" : "VaultRefPrivateSubnet1",
       		"Properties" :
 			    {
         		"VpcId" : { "Ref" : "VaultRefVPC" },
         		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet2" },
-        		"AvailabilityZone" : { "Fn::Select": ["1",{ "Ref": "AvailabilityZones" }] },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "2" ] },
         		"Tags" :
 					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 2"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Subnet 2"}]
       		}
     	},
    
     	"VaultRefPrivateSubnet3" :
 		  {
       		"Type" : "AWS::EC2::Subnet",
-      		"Condition" : "PrivateSubnet3Toggle",
+          "Condition" : "CreateNode3",
+          "DependsOn" : "VaultRefPrivateSubnet2",
       		"Properties" :
 			    {
         		"VpcId" : { "Ref" : "VaultRefVPC" },
         		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet3" },
-        		"AvailabilityZone" : { "Fn::Select": ["2",{ "Ref": "AvailabilityZones" }] },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "3" ] },
         		"Tags" :
 					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 3"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Subnet 3"}]
       		}
     	},
     	
       "VaultRefPrivateSubnet4" :
 		  {
       		"Type" : "AWS::EC2::Subnet",
-      		"Condition" : "PrivateSubnet4Toggle",
+          "Condition" : "CreateNode4",
+          "DependsOn" : "VaultRefPrivateSubnet3",
       		"Properties" :
 			    {
         		"VpcId" : { "Ref" : "VaultRefVPC" },
         		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet4" },
-        		"AvailabilityZone" : { "Fn::Select": ["3",{ "Ref": "AvailabilityZones" }] },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "4" ] },
         		"Tags" :
 					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Private Subnet 4"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Subnet 4"}]
+      		}
+    	},
+    	
+      "VaultRefPrivateSubnet5" :
+		  {
+      		"Type" : "AWS::EC2::Subnet",
+          "Condition" : "CreateNode5",
+          "DependsOn" : "VaultRefPrivateSubnet4",
+      		"Properties" :
+			    {
+        		"VpcId" : { "Ref" : "VaultRefVPC" },
+        		"CidrBlock" : { "Ref" : "CIDRForVaultPrivateSubnet5" },
+                "AvailabilityZone" : { "Fn::FindInMap" : [ "RegionAZMap", { "Ref" : "AWS::Region" }, "5" ] },
+        		"Tags" :
+					  [{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Subnet 5"}]
       		}
     	},
     	
@@ -231,7 +316,7 @@
 				  {
 	        	"Tags" :
 						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Internet Gateway"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Internet Gateway"}]
 	      	}
 	    },
 
@@ -253,7 +338,7 @@
 	          "VpcId" : {"Ref" : "VaultRefVPC"},
 	        	"Tags" :
 						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Private Routing Table"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Private Routing Table"}]
           }
 	    },
 	    
@@ -265,7 +350,7 @@
 	        	"VpcId" : {"Ref" : "VaultRefVPC"},
 	        	"Tags" :
 						[{"Key" : "Application", "Value" : { "Ref" : "AWS::StackId"} },
-						{"Key" : "Name", "Value" : "Vault Reference Public Routing Table, used only for NAT Gateway"}]
+						{"Key" : "Name", "Value" : "VAULT CORE REFERENCE: Public Routing Table, used only for NAT Gateway"}]
 				  }
 	    },
 
@@ -294,6 +379,7 @@
 	    "VaultRefPublicSubnetRouteTableAssociation2" :
 		  {
 				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+				  "DependsOn" : "VaultRefPublicSubnet1",
 	      	"Properties" :
 				  {
 	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet2" },
@@ -304,6 +390,8 @@
 	    "VaultRefPublicSubnetRouteTableAssociation3" :
 		  {
 				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+          "Condition" : "CreateNode3",
+          "DependsOn" : "VaultRefPublicSubnet2",
 	      	"Properties" :
 				  {
 	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet3" },
@@ -311,10 +399,34 @@
 	      	}
 	    },
 	    
+	    "VaultRefPublicSubnetRouteTableAssociation4" :
+		  {
+				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+          "Condition" : "CreateNode4",
+          "DependsOn" : "VaultRefPublicSubnet3",
+	      	"Properties" :
+				  {
+	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet4" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" }
+	      	}
+	    },
+	    
+	    "VaultRefPublicSubnetRouteTableAssociation5" :
+		  {
+				  "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+          "Condition" : "CreateNode5",
+          "DependsOn" : "VaultRefPublicSubnet4",
+	      	"Properties" :
+				  {
+	            "SubnetId" : { "Ref" : "VaultRefPublicSubnet5" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPublicRouteTable" }
+	      	}
+	    },
+	
+	    
 		  "VaultRefPrivateSubnetRouteTableAssociation1" :
 		  {
 			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      		"Condition" : "PrivateSubnet1Toggle",
 	      	"Properties" :
 				  {
 	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet1" },
@@ -325,7 +437,7 @@
 			"VaultRefPrivateSubnetRouteTableAssociation2" :
 		  {
 			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      		"Condition" : "PrivateSubnet2Toggle",
+				  "DependsOn" : "VaultRefPrivateSubnet1",
 	      	"Properties" :
 				  {
 	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet2" },
@@ -336,7 +448,8 @@
 			"VaultRefPrivateSubnetRouteTableAssociation3" :
 		  {
 			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      		"Condition" : "PrivateSubnet3Toggle",
+          "Condition" : "CreateNode3",
+          "DependsOn" : "VaultRefPrivateSubnet2",
 	      	"Properties" :
 				  {
 	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet3" },
@@ -347,10 +460,23 @@
 			"VaultRefPrivateSubnetRouteTableAssociation4" :
 		  {
 			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-      		"Condition" : "PrivateSubnet4Toggle",
+          "Condition" : "CreateNode4",
+          "DependsOn" : "VaultRefPrivateSubnet3",
 	      	"Properties" :
 				  {
 	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet4" },
+	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
+	      	}
+	    },
+	    
+			"VaultRefPrivateSubnetRouteTableAssociation5" :
+		  {
+			    "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+          "Condition" : "CreateNode5",
+          "DependsOn" : "VaultRefPrivateSubnet4",
+	      	"Properties" :
+				  {
+	        		"SubnetId" : { "Ref" : "VaultRefPrivateSubnet5" },
 	        		"RouteTableId" : { "Ref" : "VaultRefPrivateRouteTable" }
 	      	}
 	    },
@@ -384,7 +510,28 @@
               "DestinationCidrBlock" : "0.0.0.0/0",
               "NatGatewayId" : { "Ref" : "VaultRefNAT" }
           }
+      },
+      
+    "VPCPeeringAuthorizerRole" :
+    {
+      "Type": "AWS::IAM::Role",
+      "Properties" :
+      {
+        "AssumeRolePolicyDocument":
+        {
+          "Statement": [{ "Effect": "Allow", "Principal": { "AWS": { "Fn::Join" : [ "", [ "arn:aws:iam::", { "Ref" : "RequesterAccountNumber" }, ":root" ] ] } }, "Action": "sts:AssumeRole" }]
+        },
+        
+        "Policies" :
+        [{
+            "PolicyName" : "VPCAuthorizer",
+            "PolicyDocument" :
+            {
+              "Statement" : [{ "Effect" : "Allow", "Action" : ["ec2:AcceptVpcPeeringConnection"], "Resource" : ["*"] }]
+            }
+        }]
       }
+    }
 	
 
 	},
@@ -398,69 +545,117 @@
 		  {
 	       "Ref": "VaultRefVPC"
 		  },
-	      "Description": "VPC ID"
+	      "Description": "VAULT CORE REFERENCE: VPC ID"
 	   },
+	   
+	  "SubnetNodeTotal" :
+	  {
+		  "Description": "VAULT CORE REFERENCE: Total number of subnets in Stack. (This value needs to be used in conjunction with the Region in which the Stack is deployed.)",
+	    "Value": { "Ref" : "NumberOfSubnetNodes" },
+	    "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SubnetNodeTotal" }}
+	  },
 	  
 	  "VaultPublicSubnet1" :
 	  {
-      "Description": "ID of Public Subnet 1",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 1",
       "Value" : { "Ref" : "VaultRefPublicSubnet1" }
     },
 	  
 		"VaultPublicSubnet2" :
 	  {
-      "Description": "ID of Public Subnet 2",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 2",
       "Value" : { "Ref" : "VaultRefPublicSubnet2" }
     },
     
-    "VaultPublicSubnet3" :
+		"VaultPublicSubnet3" :
 	  {
-      "Description": "ID of Public Subnet 3",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 3",
+      "Condition" : "CreateNode3",
       "Value" : { "Ref" : "VaultRefPublicSubnet3" }
+    },
+    
+		"VaultPublicSubnet4" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Ref" : "VaultRefPublicSubnet4" }
+    },
+    
+		"VaultPublicSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Ref" : "VaultRefPublicSubnet5" }
     },
 	
 	  "VaultPrivateSubnet1" :
 	  {
-      "Description": "ID of Private Subnet 1",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 1",
       "Value" : { "Ref" : "VaultRefPrivateSubnet1" }
-    },
-    
-    "VaultPrivateSubnet1Toggle" :
-	  {
-      "Description": "Should we Deploy Private Subnet 1? yes/no",
-      "Value" : { "Ref" : "DeployVaultPrivateSubnet1" }
     },
     
     "VaultPrivateSubnet2" :
 	  {
-      "Description": "ID of Private Subnet 2",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 2",
       "Value" : { "Ref" : "VaultRefPrivateSubnet2" }
-    },
-    
-    "VaultPrivateSubnet2Toggle" :
-	  {
-      "Description": "Should we Deploy Private Subnet 2? yes/no",
-      "Value" : { "Ref" : "DeployVaultPrivateSubnet2" }
     },
     
     "VaultPrivateSubnet3" :
 	  {
-      "Description": "ID of Private Subnet 3",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 3",
+      "Condition" : "CreateNode3",
       "Value" : { "Ref" : "VaultRefPrivateSubnet3" }
     },
     
-    "VaultPrivateSubnet3Toggle" :
+    "VaultPrivateSubnet4" :
 	  {
-      "Description": "Should we Deploy Private Subnet 3? yes/no",
-      "Value" : { "Ref" : "DeployVaultPrivateSubnet3" }
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Ref" : "VaultRefPrivateSubnet4" }
+    },
+    
+    "VaultPrivateSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Ref" : "VaultRefPrivateSubnet5" }
     },
     
     "VaultCIDRBastionAccess" :
 	  {
-      "Description": "CIDR of IP used for access to Bastion host",
+      "Description": "VAULT CORE REFERENCE: CIDR of IP used for access to Bastion host",
       "Value" : { "Ref" : "VaultIngressCIDR" }
+    },
+    
+    "VaultImageID" :
+    {
+      "Description": "VAULT CORE REFERENCE: Image ID of AMI used for Vault Core Infrastructure",
+      "Value" : { "Ref" : "VaultCoreEC2AMI" }
+    },
+    
+    "VaultInstanceType" :
+    {
+      "Description": "VAULT CORE REFERENCE: Instance Type used for Vault Core Infrastructure",
+      "Value" : { "Ref" : "VaultCoreEC2InstanceType" }
+    },
+    
+    "VaultEC2KeyPair" :
+    {
+      "Description": "VAULT CORE REFERENCE: Key Pair used for Vault EC2 Instances",
+      "Value" : { "Ref" : "VaultEC2KeyPair" }
+    },
+    
+    "RoleName" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): Cross Account Role Name",
+      "Value" : { "Ref" : "VPCPeeringAuthorizerRole" }
+    },
+    
+    "VaultAppAWSAccount" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): AWS Account Number in which the App VPC is created",
+      "Value" : { "Ref" : "RequesterAccountNumber" }
     }
-	  
 	  
 	}
 }

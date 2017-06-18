@@ -96,22 +96,40 @@ echo ""
 
 sleep 5
 
-echo "Checking Network Template..."
+echo "Checking Vault Network Template..."
 echo ""
 
 aws cloudformation validate-template --template-body file://vault-core-networking.json
 
 echo ""
-echo "Checking Security Template..."
+echo "Checking Vault Security Template..."
 echo ""
 
 aws cloudformation validate-template --template-body file://vault-core-security.json
 
 echo ""
-echo "Checking Security Template..."
+echo "Checking Vault Instances Template..."
 echo ""
 
 aws cloudformation validate-template --template-body file://vault-core-instances.json
+
+echo ""
+echo "Checking Application Network Template..."
+echo ""
+
+aws cloudformation validate-template --template-body file://vault-app-networking.json
+
+echo ""
+echo "Checking Application Security Template..."
+echo ""
+
+aws cloudformation validate-template --template-body file://vault-app-security.json
+
+echo ""
+echo "Checking Application Instances Template..."
+echo ""
+
+aws cloudformation validate-template --template-body file://vault-app-instances.json
 
 }
 
@@ -120,18 +138,31 @@ create_cf_stack () {
 clear
 
 echo "---------------------------------------------------------------------------------------"
-echo "BUILD CLOUDFORMATION STACK"
+echo "BUILDING CLOUDFORMATION STACK..."
 echo "---------------------------------------------------------------------------------------"
 
 echo ""
 
-echo "Enter the name of the AWS profile you wish to use (Leave blank for 'default' profile)..."
+echo "Enter the name of the MAIN AWS profile you wish to use."
+echo "This will be the profile of the account in which the Vault environment is to be created. (Leave blank for 'default' profile)..."
 echo ""
 
 read -p "> " profile
 
 if [ -z "$profile" ]; then
     profile="default"
+fi
+
+echo ""
+
+echo "Enter the name of the SECONDARY AWS profile you wish to use."
+echo "This will be the profile of the account in which the Reference Application environment is to be created. (Leave blank for 'default' profile)..."
+echo ""
+
+read -p "> " profile2
+
+if [ -z "$profile2" ]; then
+    profile2="default"
 fi
 
 echo ""
@@ -143,16 +174,122 @@ read -p "> " stackname
 stackname_parsed=$(echo $stackname | tr ' ' '-')
 
 echo ""
+echo "What AWS Region will this be installed in? (e.g. eu-west-1)..."
+echo ""
 
-aws cloudformation create-stack --stack-name $stackname_parsed"-1" --template-body file://vault-core-networking.json --parameters file://vault-core-networking-parameters.json --capabilities CAPABILITY_IAM
+read -p "> " regionname
 
-sleep 200
+echo ""
+echo "How many subnets do you require? (2 is default)"
+echo "N.B. Please make sure the number of subnets matches the region you choose (No checking is done on this)..."
+echo ""
 
-aws cloudformation create-stack --stack-name $stackname_parsed"-2" --template-body file://vault-core-security.json --parameters  ParameterKey=VaultStackName,ParameterValue=$stackname_parsed"-1" --capabilities CAPABILITY_IAM
+read -p "> " subnetnumber
 
-sleep 100
+if [ -z "$subnetnumber" ]; then
+    subnetnumber="2"
+fi
 
-aws cloudformation create-stack --stack-name $stackname_parsed"-3" --template-body file://vault-core-instances.json --parameters  ParameterKey=VaultChildStackName,ParameterValue=$stackname_parsed"-2" --capabilities CAPABILITY_IAM
+echo ""
+echo "Creating Stack: "$stackname_parsed"-1 ..."
+echo ""
+
+aws --profile $profile --region $regionname cloudformation create-stack --stack-name $stackname_parsed"-1" --template-body file://vault-core-networking.json --parameters file://vault-core-networking-parameters.json --capabilitie CAPABILITY_IAM
+
+aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-1"
+while [ $? -ne 0 ]; do
+    aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-1"
+    sleep 3
+done
+
+if [ $? -eq 0 ]; then
+{
+  echo ""
+  echo "Creating Stack: "$stackname_parsed"-2 ..."
+  echo ""
+}
+fi
+
+aws --profile $profile cloudformation create-stack --stack-name $stackname_parsed"-2" --template-body file://vault-core-security.json --parameters ParameterKey=NumberOfSubnetNodes,ParameterValue=$subnetnumber ParameterKey=VaultStackName,ParameterValue=$stackname_parsed"-1" --capabilities CAPABILITY_IAM
+
+aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-2"
+while [ $? -ne 0 ]; do
+    aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-2"
+    sleep 3
+done
+
+if [ $? -eq 0 ]; then
+{
+  echo ""
+  echo "Creating Stack: "$stackname_parsed"-3 ..."
+  echo ""
+}
+fi
+
+aws --profile $profile cloudformation create-stack --stack-name $stackname_parsed"-3" --template-body file://vault-core-instances.json --parameters  ParameterKey=NumberOfSubnetNodes,ParameterValue=$subnetnumber ParameterKey=VaultChildStackName,ParameterValue=$stackname_parsed"-2" --capabilities CAPABILITY_IAM
+
+
+aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-3"
+while [ $? -ne 0 ]; do
+    aws --profile $profile --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-3"
+    sleep 3
+done
+
+#if [ $? -eq 0 ]; then
+#{
+#  echo ""
+#  echo "Creating Stack: "$stackname_parsed"-App-1 ..."
+#  echo ""
+#}
+#fi
+
+#aws --profile $profile2 --region $regionname cloudformation create-stack --stack-name $stackname_parsed"-App-1" --template-body file://vault-app-networking.json --parameters file://vault-app-networking-parameters.json --capabilities CAPABILITY_IAM --region eu-west-1
+
+#aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-1"
+#while [ $? -ne 0 ]; do
+#    aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-1"
+#    sleep 3
+#done
+
+#if [ $? -eq 0 ]; then
+#{
+#  echo ""
+#  echo "Creating Stack: "$stackname_parsed"-App-2 ..."
+#  echo ""
+#}
+#fi
+
+#aws --profile $profile2 --region $regionname cloudformation create-stack --stack-name $stackname_parsed"-App-2" --template-body file://vault-app-security.json --parameters  ParameterKey=VaultStackName,ParameterValue=$stackname_parsed"-App-1" --capabilities CAPABILITY_IAM
+
+#aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-2"
+#while [ $? -ne 0 ]; do
+#    aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-2"
+#    sleep 3
+#done
+
+#if [ $? -eq 0 ]; then
+#{
+#  echo ""
+#  echo "Creating Stack: "$stackname_parsed"-App-3 ..."
+#  echo ""
+#}
+#fi
+
+#aws --profile $profile2 --region $regionname cloudformation create-stack --stack-name $stackname_parsed"-App-3" --template-body file://vault-app-instances.json --parameters  ParameterKey=VaultChildStackName,ParameterValue=$stackname_parsed"-App-2" --capabilities CAPABILITY_IAM
+
+#aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-3"
+#while [ $? -ne 0 ]; do
+#    aws --profile $profile2 --region $regionname cloudformation wait stack-create-complete --stack-name $stackname_parsed"-App-3"
+#    sleep 3
+#done
+
+if [ $? -eq 0 ]; then
+{
+  echo ""
+  echo "All Stacks Created Successfully."
+  echo ""
+}
+fi
 
 }
 

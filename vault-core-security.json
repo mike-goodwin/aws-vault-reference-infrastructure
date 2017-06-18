@@ -1,6 +1,6 @@
 {
 "AWSTemplateFormatVersion" : "2010-09-09",
-"Description" : "Hashicorp Vault Reference: Core Security Infrastructure: This template creates a Private and Public Security Group and 1 Test EC2 instance.",
+"Description" : "HASHICORP VAULT REFERENCE (Core Security Infrastructure) - Creates a Private and Public Security Group (and ultimately any NACLs required) for the ingress and egress of data in the VPC that builds the Vault infrastructure.",
 
 	"Metadata" :
 	{
@@ -11,19 +11,49 @@
 
       "VaultStackName":
       {
-        "Description": "Name of the stack containing the vault networking",
+        "Description": "Name of the Stack containing the Vault networking",
         "Type": "String"
+      },
+      
+      "NumberOfSubnetNodes" :
+      {
+        "Description" : "Vault Core Infrastructure - Default, Min and Max Values for Number of Subnets (and therefore Instances) created to serve the Vault Core Software",
+        "Type" : "Number",
+        "Default" : 2,
+        "MinValue" : 2,
+        "MaxValue" : 5
       }
   
   },
 
 	"Mappings" :
 	{
+	    "RegionAZMap" :
+      {
+          "us-east-1" : { "1" : "us-east-1a", "2" : "us-east-1b", "3" : "us-east-1c", "4" : "us-east-1d", "5" : "us-east-1e" },
+          "us-east-2" : { "1" : "us-east-2a", "2" : "us-east-2b", "3" : "us-east-2c" },
+          "us-west-1" : { "1" : "us-west-1b", "2" : "us-west-1c" },
+          "us-west-2" : { "1" : "us-west-2a", "2" : "us-west-2b", "3" : "us-west-2c" },
+          "ca-central-1" : { "1" : "ca-central-1a", "2" : "ca-central-1b" },
+          "eu-west-1" : { "1" : "eu-west-1a", "2" : "eu-west-1b", "3" : "eu-west-1c"  },
+          "eu-central-1" : { "1" : "eu-central-1a", "2" : "eu-central-1b" },
+          "eu-west-2" : { "1" : "eu-west-2a", "2" : "eu-west-2b" },
+          "ap-southeast-1" : { "1" : "ap-southeast-1a", "2" : "ap-southeast-1b"  },
+          "ap-southeast-2" : { "1" : "ap-southeast-2a", "2" : "ap-southeast-2b", "3" : "ap-southeast-2c" },
+          "ap-northeast-2" : { "1" : "ap-northeast-2a", "2" : "ap-northeast-2c" },
+          "ap-northeast-1" : { "1" : "ap-northeast-1a", "2" : "ap-northeast-1c" },
+          "ap-south-1" : { "1" : "ap-south-1a", "2" : "ap-south-1b" },
+          "sa-east-1" : { "1" : "sa-east-1a", "2" : "sa-east-1b", "3" : "sa-east-1c" }
+      }
   },
-
-	"Conditions" :
+  
+  "Conditions" :
 	{
-  },
+	    "CreateNode5" : { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 5 ]},
+      "CreateNode4" : { "Fn::Or" : [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 4 ] }, { "Condition" : "CreateNode5" }]},
+      "CreateNode3" : { "Fn::Or" : [ { "Fn::Equals" : [ { "Ref" : "NumberOfSubnetNodes" }, 3 ] }, { "Condition" : "CreateNode4" }]}
+	},
+
 
 	"Resources" :
   {
@@ -175,14 +205,22 @@
           {
             "GroupDescription" : "Allow http to client host",
             "VpcId" : { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] },
-            "SecurityGroupIngress" : [{
+            "SecurityGroupIngress" : [
+            {
                 "IpProtocol" : "tcp",
                 "FromPort" : "22",
                 "ToPort" : "22",
                 "CidrIp" :  "0.0.0.0/0"
+            },
+            {
+                "IpProtocol" : "tcp",
+                "FromPort" : "8200",
+                "ToPort" : "8200",
+                "CidrIp" :  "0.0.0.0/0"
             }],
             
-            "SecurityGroupEgress" : [{
+            "SecurityGroupEgress" : [
+            {
                 "IpProtocol" : "tcp",
                 "FromPort" : "443",
                 "ToPort" : "443",
@@ -201,74 +239,126 @@
 	  
 	  "VaultRefVPC":
 		{
-	     "Value": { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] },
-	     "Description": "VPC ID"
-	   },
-	  
+		  "Description": "VAULT CORE REFERENCE: VPC ID",
+	   "Value": { "Fn::GetAtt" : ["NetworkInfo","VaultRefVPC"] }
+	  },
+	  "SubnetNodeTotal":
+	  {
+	    "Description": "VAULT CORE REFERENCE: Total number of subnets in Stack. (This value needs to be used in conjunction with the Region in which the Stack is deployed.)",
+	    "Value": {"Fn::ImportValue" : {"Fn::Sub" : "${VaultStackName}-SubnetNodeTotal"}}
+	  },
 	  "VaultPublicSubnet1" :
 	  {
-      "Description": "ID of Public Subnet 1",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 1",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet1"] }
     },
 	  
 		"VaultPublicSubnet2" :
 	  {
-      "Description": "ID of Public Subnet 2",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 2",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet2"] }
     },
     
-    "VaultPublicSubnet3" :
+		"VaultPublicSubnet3" :
 	  {
-      "Description": "ID of Public Subnet 3",
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 3",
+      "Condition" : "CreateNode3",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet3"] }
     },
-	
+    
+		"VaultPublicSubnet4" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet4"] }
+    },
+    
+		"VaultPublicSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Public Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPublicSubnet5"] }
+    },
+    
 	  "VaultPrivateSubnet1" :
 	  {
-      "Description": "ID of Private Subnet 1",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 1",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1"] }
     },
     
-    "VaultPrivateSubnet1Toggle" :
+    "VaultPrivateSubnet2" :
 	  {
-      "Description": "Should we Deploy Private Subnet 1? yes/no",
-      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet1Toggle"] }
-    },
-    
-  	"VaultPrivateSubnet2" :
-	  {
-      "Description": "ID of Private Subnet 2",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 2",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2"] }
-    },
-    
-    "VaultPrivateSubnet2Toggle" :
-	  {
-      "Description": "Should we Deploy Private Subnet 2? yes/no",
-      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet2Toggle"] }
     },
     
     "VaultPrivateSubnet3" :
 	  {
-      "Description": "ID of Private Subnet 3",
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 3",
+      "Condition" : "CreateNode3",
       "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3"] }
     },
     
-    "VaultPrivateSubnet3Toggle" :
+    "VaultPrivateSubnet4" :
 	  {
-      "Description": "Should we Deploy Private Subnet 3? yes/no",
-      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet3Toggle"] }
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 4",
+      "Condition" : "CreateNode4",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet4"] }
+    },
+    
+    "VaultPrivateSubnet5" :
+	  {
+      "Description": "VAULT CORE REFERENCE: ID of Private Subnet 5",
+      "Condition" : "CreateNode5",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultPrivateSubnet5"] }
+    },
+    
+    "VaultCIDRBastionAccess" :
+	  {
+      "Description": "VAULT CORE REFERENCE: CIDR of IP used for access to Bastion host",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultCIDRBastionAccess"] }
+    },
+    
+    "VaultImageID" :
+    {
+      "Description": "VAULT CORE REFERENCE: Image ID of AMI used for Vault Core Infrastructure",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultImageID"] }
+    },
+    
+    "VaultInstanceType" :
+    {
+      "Description": "VAULT CORE REFERENCE: Instance Type used for Vault Core Infrastructure",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultInstanceType"] }
+    },
+    
+    "VaultEC2KeyPair" :
+    {
+      "Description": "VAULT CORE REFERENCE: Key Pair used for Vault EC2 Instances",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultEC2KeyPair"] }
     },
     
     "VaultPublicSG" :
 	  {
-      "Description": "Vault Public Instance Security Group",
+      "Description": "VAULT CORE REFERENCE: Public Instance Security Group",
       "Value" : { "Ref" : "VaultPublicInstanceSecurityGroup"}
     },
     
     "VaultPrivateSG" :
 	  {
-      "Description": "Vault Private Instance Security Group",
+      "Description": "VAULT CORE REFERENCE: Private Instance Security Group",
       "Value" : { "Ref" : "VaultPrivateInstanceSecurityGroup"}
+    },
+    
+    "RoleName" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): Cross Account Role Name",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","RoleName"] }
+    },
+    
+    "VaultAppAWSAccount" :
+    {
+      "Description": "VAULT CORE REFERENCE - (VPC Peering): AWS Account Number in which the App VPC is created",
+      "Value" : { "Fn::GetAtt" : ["NetworkInfo","VaultAppAWSAccount"] }
     }
 	  
   }
